@@ -1,0 +1,940 @@
+#!/usr/bin/env python3
+"""Validate final HTML report quality gates.
+
+This complements guard_validate.py, which validates IR before rendering.
+html_quality_gate.py validates the final HTML shell, theme fidelity, and KPI
+rendering so direct HTML generation cannot bypass the guardrails.
+"""
+
+from __future__ import annotations
+
+import argparse
+from dataclasses import asdict, dataclass
+import html as html_lib
+from html.parser import HTMLParser
+import json
+import re
+import sys
+from pathlib import Path
+
+
+PLACEHOLDER_RE = re.compile(r"\[INSERT VALUE\]")
+
+_COMMENT_RE = re.compile(r"<!--.*?-->", re.DOTALL)
+
+
+def strip_comments(html: str) -> str:
+    """Remove HTML comments before structural checks.
+
+    Substring checks like `id="export-btn" in html` are otherwise satisfiable
+    from inside a comment.
+    """
+    return _COMMENT_RE.sub("", html)
+
+
+STANDARD_REQUIRED_IDS = [
+    "report-summary",
+    "toc-toggle-btn",
+    "toc-sidebar",
+    "card-mode-btn",
+    "sc-overlay",
+    "edit-hotzone",
+    "edit-toggle",
+    "export-btn",
+    "export-menu",
+    "export-print",
+    "export-png-desktop",
+    "export-png-mobile",
+    "export-im-share",
+]
+
+ANIMATED_MODES = ("scrollytelling", "iridescence")
+
+ANIMATED_REQUIRED_IDS = ("play-btn", "nav-sections")
+
+FORBIDDEN_FONT_ORIGINS = ("fonts.googleapis.com", "fonts.gstatic.com")
+
+# scrollytelling may load exactly these three (src, integrity) pairs — pinned
+# version AND hash, so a CDN swap or a forged hash is a finding. Bumping GSAP
+# means updating this set and the recipe together, which is the point of pinning.
+SCROLLYTELLING_ALLOWED_SCRIPTS = frozenset({
+    (
+        "https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js",
+        "sha512-7eHRwcbYkK4d9g/6tD/mhkf++eoTHwpNM9woBxtPUBWm67zeAfFC+HrdoE2GanKeocly/VxeLvIqwvCdk7qScg==",
+    ),
+    (
+        "https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js",
+        "sha512-onMTRKJBKz8M1TnqqDuGBlowlH0ohFzMXYRNebz+yOcc5TQr/zAKsthzhuv0hiyUKEiQEQXEynnXCvNTOk50dg==",
+    ),
+    (
+        "https://cdnjs.cloudflare.com/ajax/libs/countup.js/2.8.0/countUp.umd.min.js",
+        "sha512-kUIpdMjMlkYUVQgR3wVXJtmuwoD+G69Zt9JBa2rPH4C/+VPlAsQWKcqCv0SpJ8AnezBjfuM2JDjnc58Ee8Filw==",
+    ),
+})
+
+# Elements whose text content must never be mistaken for markup. script/style
+# already switch HTMLParser into CDATA mode; template/textarea/title do not.
+_INERT_ELEMENTS = frozenset({"template", "textarea", "title", "script", "style"})
+
+_VOID_ELEMENTS = frozenset({
+    "area", "base", "br", "col", "embed", "hr", "img", "input",
+    "link", "meta", "source", "track", "wbr",
+})
+
+
+class _RootAttrs(HTMLParser):
+    """Attributes of the document's first start tag, if that tag is <html>.
+
+    Requiring <html> to come first (per the HTML spec) stops a fake root inside
+    RCDATA content — e.g. `<title><html data-render-mode="animated"></title>` —
+    from deciding the render mode.
+    """
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.attrs: dict[str, str | None] | None = None
+        self._first = True
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if not self._first:
+            return
+        self._first = False
+        if tag == "html":
+            self.attrs = dict(attrs)
+
+
+class _IdCollector(HTMLParser):
+    """Collect `id` values of real elements, skipping inert element content."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.ids: set[str] = set()
+        self._inert: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag in _INERT_ELEMENTS:
+            self._inert.append(tag)
+            return
+        if self._inert:
+            return
+        element_id = dict(attrs).get("id")
+        if element_id:
+            self.ids.add(element_id)
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag in _INERT_ELEMENTS and tag in self._inert:
+            while self._inert and self._inert.pop() != tag:
+                pass
+
+
+class _ScriptCollector(HTMLParser):
+    """Collect (src, integrity) of every external script, quoted or not."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.external: list[tuple[str, str]] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag != "script":
+            return
+        attrs_d = dict(attrs)
+        src = attrs_d.get("src")
+        if src:
+            self.external.append((src, attrs_d.get("integrity") or ""))
+
+
+def real_element_ids(html: str) -> set[str]:
+    parser = _IdCollector()
+    parser.feed(html)
+    return parser.ids
+
+
+def external_scripts(html: str) -> list[tuple[str, str]]:
+    parser = _ScriptCollector()
+    parser.feed(html)
+    return parser.external
+
+
+def is_animated_html(html: str) -> bool:
+    parser = _RootAttrs()
+    parser.feed(html)
+    return (parser.attrs or {}).get("data-render-mode") == "animated"
+
+
+def validate_animated_shell(html: str) -> list[Finding]:
+    """Animated-track assertions.
+
+    Scope (see §threat model): this catches
+    generator omissions — missing chrome, placeholder KPIs, unpinned CDNs — not
+    hand-crafted HTML parsing ambiguities. The input is always HTML this skill
+    generated itself.
+    """
+    findings: list[Finding] = []
+    scrubbed = strip_comments(html)
+
+    for attr in ('data-template="kai-report-creator"', "data-version=", "data-theme="):
+        if attr.replace('"', "'") not in scrubbed and attr not in scrubbed:
+            findings.append(Finding("animated.missing_attr", f"Missing marker: {attr}"))
+
+    mode_match = re.search(r'data-animation=["\']([^"\']+)["\']', scrubbed)
+    mode = mode_match.group(1) if mode_match else None
+    if mode not in ANIMATED_MODES:
+        findings.append(
+            Finding("animated.invalid_mode", f"data-animation must be one of {ANIMATED_MODES}, got {mode!r}.")
+        )
+
+    theme_match = re.search(r'data-theme=["\']([^"\']+)["\']', scrubbed)
+    theme = theme_match.group(1) if theme_match else None
+    if mode in ANIMATED_MODES and theme != mode:
+        findings.append(
+            Finding("animated.theme_mode_mismatch", f"data-theme must equal data-animation ({mode!r}), got {theme!r}.")
+        )
+
+    # Frame chrome: require the real elements users interact with. Whether the
+    # keys actually page is verified in a browser (recipe QA checklist), not here.
+    element_ids = real_element_ids(html)
+    for required in ANIMATED_REQUIRED_IDS:
+        if required not in element_ids:
+            findings.append(
+                Finding("animated.missing_chrome", f"Missing animated chrome element id={required!r}.")
+            )
+    if re.search(r"body\.playing\s*\{[^}]*overflow\s*:\s*hidden", scrubbed):
+        findings.append(Finding("animated.playing_overflow_hidden", "body.playing must not set overflow:hidden (breaks paging)."))
+
+    for origin in FORBIDDEN_FONT_ORIGINS:
+        if origin in scrubbed:
+            findings.append(Finding("animated.external_font", f"External font origin forbidden: {origin}"))
+
+    scripts = external_scripts(html)
+    if mode == "iridescence":
+        if scripts:
+            findings.append(
+                Finding("animated.external_script", f"iridescence mode must have zero CDNs, found: {[s for s, _ in scripts]}")
+            )
+        if not re.search(r"getContext\(\s*['\"]webgl", scrubbed):
+            findings.append(Finding("animated.missing_webgl", "iridescence mode requires a WebGL canvas."))
+        elif not re.search(r"canvas\.style\.background\s*=", scrubbed):
+            findings.append(
+                Finding("animated.missing_webgl_fallback", "Missing WebGL-unavailable fallback (canvas.style.background assignment).")
+            )
+    elif mode == "scrollytelling":
+        loaded = set(scripts)
+        unexpected = loaded - SCROLLYTELLING_ALLOWED_SCRIPTS
+        for src, integrity in sorted(unexpected):
+            findings.append(
+                Finding(
+                    "animated.external_script",
+                    f"Script not in the pinned (src, integrity) allow-list: {src} integrity={integrity[:24]!r}",
+                )
+            )
+        for src, _ in sorted(SCROLLYTELLING_ALLOWED_SCRIPTS - loaded):
+            findings.append(Finding("animated.missing_pinned_script", f"Required pinned script missing: {src}"))
+
+    findings.extend(validate_animated_summary_kpis(html))
+    return findings
+
+
+def validate_animated_summary_kpis(html: str) -> list[Finding]:
+    """Animated pages keep numbers in JS, so the summary JSON is the audit face.
+
+    This proves each KPI is present and non-placeholder. It cannot prove a value
+    is truthful — that is IR sourcing plus human QA (see §threat model).
+    """
+    findings: list[Finding] = []
+    summary = extract_summary_json(html)
+    kpis = (summary or {}).get("kpis")
+    if not kpis or not isinstance(kpis, list):
+        findings.append(
+            Finding("animated.missing_summary_kpis", "Animated reports need a non-empty report-summary.kpis list.")
+        )
+        return findings
+    for item in kpis:
+        value = str((item or {}).get("value", "")).strip() if isinstance(item, dict) else ""
+        if not value or not has_real_number(value):
+            findings.append(
+                Finding("animated.invalid_summary_kpi", f"Summary KPI value must be a real number, got {value!r}.")
+            )
+    return findings
+
+
+THEME_MARKERS = {
+    "corporate-blue": ["/* Theme: corporate-blue", "--font-sans:", "body { font-family: var(--font-sans)"],
+    "minimal": ["/* Theme: minimal", "--font-sans:", "body { font-family: var(--font-sans)"],
+    "dark-tech": ["/* Theme: dark-tech", "--font-mono:", "body { font-family: var(--font-sans)"],
+    "dark-board": ["/* Theme: dark-board", "--font-mono:", "body { font-family: var(--font-sans)"],
+    "data-story": ["/* Theme: data-story", "--font-sans:", "body { font-family: var(--font-sans)"],
+    "newspaper": ["/* Theme: newspaper", "--font-sans:", "body { font-family: var(--font-sans)"],
+    "regular-lumen": [
+        "/* Theme: regular-lumen",
+        "--bg: #F7F5F1",
+        "--font-sans: 'Playfair Display'",
+        "body { font-family: var(--font-sans)",
+        ".report-wrapper { max-width: 920px",
+        ".main-with-toc",
+    ],
+    "forest-editorial": [
+        "/* Theme: forest-editorial",
+        "--bg: #f5f7f3",
+        "--fe-anchor: #102d27",
+        "body { font-family: var(--font-sans)",
+    ],
+}
+
+
+@dataclass(frozen=True)
+class Finding:
+    code: str
+    message: str
+
+
+def strip_tags(fragment: str) -> str:
+    text = re.sub(r"<[^>]+>", "", fragment)
+    return html_lib.unescape(text).strip()
+
+
+def has_real_number(value: str) -> bool:
+    return bool(re.search(r"\d", value)) and not PLACEHOLDER_RE.search(value)
+
+
+def extract_theme(html: str) -> str | None:
+    match = re.search(r'data-theme=["\']([^"\']+)["\']', html)
+    return match.group(1) if match else None
+
+
+def extract_cover_mode(html: str) -> str | None:
+    match = re.search(r'data-cover=["\']([^"\']+)["\']', html)
+    return match.group(1) if match else None
+
+
+class _CoverStructure(HTMLParser):
+    """Where the cover sits relative to the wrapper, and what it contains.
+
+    Sibling order and nesting cannot be checked with substrings: a cover placed
+    inside `.report-wrapper` contains exactly the same markup as a correct one
+    and silently loses full-bleed.
+
+    Content of `_INERT_ELEMENTS` is not live document markup, so — as in
+    `_IdCollector` — it counts for nothing: an `<h1>` in a `<template>` is not a
+    heading, and script text in the cover is not cover copy. The one exception
+    is `<title>`, whose own text still feeds `title_text`.
+    """
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self._stack: list[tuple[str, frozenset[str]]] = []
+        self._cover_index: int | None = None
+        self._inert: list[str] = []
+        self._in_title = False
+        self.cover_seen = False
+        self.cover_inside_wrapper = False
+        self.wrapper_seen = False
+        self.wrapper_before_cover = False
+        self.h1_total = 0
+        self.h1_in_cover = 0
+        self.cards = 0
+        self.accent_cards = 0
+        self.chips = 0
+        self.watermark_hidden: bool | None = None
+        self.card_buttons = 0
+        self.card_buttons_in_cover = 0
+        self.cover_text = ""
+        self.title_text = ""
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag in _INERT_ELEMENTS:
+            self._inert.append(tag)
+            self._in_title = self._title_in_head()
+            return
+        if self._inert:
+            return
+
+        attributes = {key: (value or "") for key, value in attrs}
+        classes = frozenset(attributes.get("class", "").split())
+        in_cover = self._cover_index is not None
+
+        if attributes.get("id") == "report-cover":
+            self.cover_seen = True
+            self.cover_inside_wrapper = any(
+                "report-wrapper" in element_classes for _, element_classes in self._stack
+            )
+            if self.wrapper_seen:
+                self.wrapper_before_cover = True
+            self._cover_index = len(self._stack)
+        if "report-wrapper" in classes:
+            self.wrapper_seen = True
+        if tag == "h1":
+            self.h1_total += 1
+            if in_cover:
+                self.h1_in_cover += 1
+        if in_cover:
+            if "cover-card" in classes:
+                self.cards += 1
+                if "data-accent" in attributes:
+                    self.accent_cards += 1
+            if "cover-chip" in classes:
+                self.chips += 1
+            if "cover-watermark" in classes:
+                self.watermark_hidden = attributes.get("aria-hidden") == "true"
+        if attributes.get("id") == "card-mode-btn":
+            self.card_buttons += 1
+            if in_cover:
+                self.card_buttons_in_cover += 1
+
+        if tag not in _VOID_ELEMENTS:
+            self._stack.append((tag, classes))
+
+    def handle_endtag(self, tag: str) -> None:
+        if self._inert:
+            if tag in self._inert:
+                while self._inert and self._inert.pop() != tag:
+                    pass
+                self._in_title = self._title_in_head()
+            return
+        for index in range(len(self._stack) - 1, -1, -1):
+            if self._stack[index][0] != tag:
+                continue
+            if self._cover_index is not None and index <= self._cover_index:
+                self._cover_index = None
+            del self._stack[index:]
+            return
+
+    def _title_in_head(self) -> bool:
+        """True only for a <title> that sits in the document head.
+
+        An inline `<svg><title>Icon</title></svg>` is an accessible label, not
+        the document title; requiring `head` on the open-tag stack keeps such
+        SVG titles (which may legitimately contain `[[`) out of `title_text`.
+        """
+        return "title" in self._inert and any(
+            tag == "head" for tag, _ in self._stack
+        )
+
+    def handle_data(self, data: str) -> None:
+        if self._in_title:
+            self.title_text += data
+        if self._inert:
+            return
+        if self._cover_index is not None:
+            self.cover_text += data
+
+
+def validate_cover(html: str) -> list[Finding]:
+    findings: list[Finding] = []
+    scrubbed = strip_comments(html)
+    mode = extract_cover_mode(scrubbed)
+    theme = extract_theme(scrubbed)
+
+    if theme == "forest-editorial" and mode != "hero":
+        findings.append(
+            Finding(
+                "cover.missing_for_theme",
+                'forest-editorial implies a cover; <html> needs data-cover="hero".',
+            )
+        )
+    if mode != "hero":
+        return findings
+
+    if is_animated_html(scrubbed):
+        findings.append(
+            Finding(
+                "contract_conflict",
+                'data-cover="hero" cannot combine with data-render-mode="animated".',
+            )
+        )
+        return findings
+
+    structure = _CoverStructure()
+    structure.feed(scrubbed)
+
+    if not structure.cover_seen:
+        findings.append(
+            Finding("cover.missing", 'data-cover="hero" but no id="report-cover" element.')
+        )
+        return findings
+    if structure.cover_inside_wrapper:
+        findings.append(
+            Finding(
+                "cover.nested_in_wrapper",
+                "#report-cover must be a sibling before .report-wrapper, not inside it.",
+            )
+        )
+    elif structure.wrapper_before_cover:
+        findings.append(
+            Finding("cover.after_wrapper", "#report-cover must precede .report-wrapper.")
+        )
+    if structure.h1_total != 1:
+        findings.append(
+            Finding("cover.h1_count", f"Exactly one <h1> expected, found {structure.h1_total}.")
+        )
+    elif structure.h1_in_cover != 1:
+        findings.append(
+            Finding("cover.h1_outside", "The single <h1> must live inside #report-cover.")
+        )
+    if structure.cards not in (0, 3):
+        findings.append(
+            Finding("cover.card_count", f".cover-card count must be 0 or 3, found {structure.cards}.")
+        )
+    if structure.accent_cards > 1:
+        findings.append(
+            Finding(
+                "cover.accent_count",
+                f"At most one accent card, found {structure.accent_cards}.",
+            )
+        )
+    if structure.chips > 4:
+        findings.append(
+            Finding("cover.chip_count", f"At most 4 chips, found {structure.chips}.")
+        )
+    if structure.watermark_hidden is False:
+        findings.append(
+            Finding("cover.watermark_exposed", '.cover-watermark needs aria-hidden="true".')
+        )
+    if structure.card_buttons != 1:
+        findings.append(
+            Finding(
+                "cover.card_button_count",
+                f"Exactly one #card-mode-btn expected, found {structure.card_buttons}.",
+            )
+        )
+    elif structure.card_buttons_in_cover != 1:
+        findings.append(
+            Finding(
+                "cover.card_button_outside",
+                "The #card-mode-btn must live inside #report-cover.",
+            )
+        )
+    marker_scope = structure.cover_text + structure.title_text
+    if "[[" in marker_scope or "]]" in marker_scope:
+        findings.append(
+            Finding("cover.marker_residue", "Literal [[ or ]] survived into the rendered HTML.")
+        )
+    return findings
+
+
+def extract_summary_json(html: str) -> dict[str, object] | None:
+    match = re.search(
+        r'<script\b[^>]*id=["\']report-summary["\'][^>]*>\s*(.*?)\s*</script>',
+        html,
+        re.DOTALL,
+    )
+    if not match:
+        return None
+    try:
+        return json.loads(match.group(1))
+    except json.JSONDecodeError:
+        return None
+
+
+def kpi_values_from_html(html: str) -> list[str]:
+    pattern = re.compile(
+        r'<div\b[^>]*class=["\'][^"\']*\bkpi-value\b[^"\']*["\'][^>]*>(.*?)</div>',
+        re.DOTALL,
+    )
+    return [strip_tags(match.group(1)) for match in pattern.finditer(html)]
+
+
+def validate_standard_shell(html: str) -> list[Finding]:
+    findings: list[Finding] = []
+    scrubbed = strip_comments(html)
+    element_ids = real_element_ids(html)
+    for element_id in STANDARD_REQUIRED_IDS:
+        if element_id in element_ids:
+            continue
+        # report-summary lives on a <script> element, which _IdCollector treats
+        # as inert, so fall back to a comment-stripped substring check.
+        if f'id="{element_id}"' in scrubbed or f"id='{element_id}'" in scrubbed:
+            continue
+        findings.append(
+            Finding("shell.missing_id", f"Missing standard shell element id={element_id!r}.")
+        )
+    if 'data-template="kai-report-creator"' not in scrubbed and "data-template='kai-report-creator'" not in scrubbed:
+        findings.append(Finding("shell.missing_template_attr", "Missing data-template marker."))
+    if 'data-version=' not in scrubbed:
+        findings.append(Finding("shell.missing_version_attr", "Missing data-version marker."))
+    if 'data-theme=' not in scrubbed:
+        findings.append(Finding("shell.missing_theme_attr", "Missing data-theme marker."))
+    return findings
+
+
+def validate_theme_fidelity(html: str) -> list[Finding]:
+    findings: list[Finding] = []
+    theme = extract_theme(html)
+    if not theme:
+        return [Finding("theme.missing", "Missing data-theme attribute.")]
+
+    markers = THEME_MARKERS.get(theme)
+    if not markers:
+        return findings
+
+    for marker in markers:
+        if marker not in html:
+            findings.append(
+                Finding("theme.fingerprint_mismatch", f"{theme} HTML missing theme marker: {marker}")
+            )
+
+    if theme == "regular-lumen":
+        body_rule_match = re.search(r"body\s*\{[^}]*\}", html, re.DOTALL)
+        body_rule = body_rule_match.group(0) if body_rule_match else ""
+        if "max-width" in body_rule or re.search(r"padding\s*:\s*2rem", body_rule):
+            findings.append(
+                Finding(
+                    "theme.regular_lumen_body_layout",
+                    "regular-lumen must use .report-wrapper for width/padding, not body max-width/padding.",
+                )
+            )
+        if "background-color: var(--bg)" in body_rule and "background: var(--bg)" not in body_rule:
+            findings.append(
+                Finding(
+                    "theme.regular_lumen_background",
+                    "regular-lumen body should preserve the theme background declaration.",
+                )
+            )
+    return findings
+
+
+def validate_kpi_values(html: str) -> list[Finding]:
+    findings: list[Finding] = []
+    for value in kpi_values_from_html(html):
+        if not has_real_number(value):
+            findings.append(Finding("kpi.invalid_value", f"Invalid KPI value: {value!r}."))
+
+    summary = extract_summary_json(html)
+    if not summary:
+        findings.append(Finding("summary.invalid_json", "Missing or invalid report-summary JSON."))
+        return findings
+
+    kpis = summary.get("kpis", [])
+    if not isinstance(kpis, list):
+        findings.append(Finding("summary.invalid_kpis", "report-summary.kpis must be a list."))
+        return findings
+
+    for item in kpis:
+        if not isinstance(item, dict):
+            findings.append(Finding("summary.invalid_kpi_item", "Each summary KPI must be an object."))
+            continue
+        value = str(item.get("value", "")).strip()
+        if value and not has_real_number(value):
+            findings.append(Finding("summary.invalid_kpi_value", f"Invalid summary KPI value: {value!r}."))
+    return findings
+
+
+# ─── JSON-LD validation (v5.1) ───────────────────────────────────────────────
+
+from html.parser import HTMLParser
+from typing import List
+
+
+class _JsonLdExtractor(HTMLParser):
+    """Extract ld+json script contents from <head>, tracking position."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.in_head = False
+        self.seen_title = False
+        self.seen_style_or_link_css = False
+        self.scripts: list[tuple[str, bool]] = []
+        self._in_ld_script = False
+        self._buffer: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag == "head":
+            self.in_head = True
+            return
+        if not self.in_head:
+            return
+        if tag == "title":
+            self.seen_title = True
+        elif tag == "style":
+            self.seen_style_or_link_css = True
+        elif tag == "link":
+            attrs_d = dict(attrs)
+            rel = (attrs_d.get("rel") or "").lower()
+            if "stylesheet" in rel.split():
+                self.seen_style_or_link_css = True
+        elif tag == "script":
+            attrs_d = dict(attrs)
+            type_attr = (attrs_d.get("type") or "").strip().lower()
+            if type_attr == "application/ld+json":
+                self._in_ld_script = True
+                self._buffer = []
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag == "head":
+            self.in_head = False
+        elif tag == "script" and self._in_ld_script:
+            content = "".join(self._buffer)
+            valid_position = self.seen_title and not self.seen_style_or_link_css
+            self.scripts.append((content, valid_position))
+            self._in_ld_script = False
+            self._buffer = []
+
+    def handle_data(self, data: str) -> None:
+        if self._in_ld_script:
+            self._buffer.append(data)
+
+
+_LDJSON_BLOCK_RE = re.compile(
+    r'<script\b[^>]*\btype\s*=\s*["\']?application/ld\+json\s*["\']?[^>]*>(.*?)</script\s*>',
+    re.DOTALL | re.IGNORECASE,
+)
+_LDJSON_SCRIPT_OPEN_RE = re.compile(
+    r'<script\b[^>]*\btype\s*=\s*["\']?application/ld\+json\s*["\']?[^>]*>',
+    re.IGNORECASE,
+)
+_HASH_STRICT_RE = re.compile(r"sha256:[a-f0-9]{16}")
+
+_ALLOWED_PROPERTY_IDS = frozenset({
+    "https://kai.app/ns#reportTheme",
+    "https://kai.app/ns#reportTemplate",
+    "https://kai.app/ns#rendererVersion",
+    "https://kai.app/ns#irHash",
+    "https://kai.app/ns#metadataVersion",
+})
+
+
+def check_jsonld(html: str) -> list[Finding]:
+    """Validate schema.org JSON-LD embedded in <head>. Returns empty list on success."""
+    findings: list[Finding] = []
+
+    # <head> must exist
+    head_match = re.search(r"<head\b[^>]*>(.*?)</head>", html, re.DOTALL | re.IGNORECASE)
+    if not head_match:
+        if _LDJSON_SCRIPT_OPEN_RE.search(html):
+            findings.append(Finding("jsonld.position_invalid", "<head> not found; JSON-LD must be inside <head>"))
+        else:
+            findings.append(Finding("jsonld.missing", "no <head> and no ld+json script found"))
+        return findings
+
+    head_html = head_match.group(1)
+
+    # Raw source-level checks (before HTMLParser which may truncate on raw </script>)
+    raw_blocks = _LDJSON_BLOCK_RE.findall(head_html)
+    open_tags = _LDJSON_SCRIPT_OPEN_RE.findall(head_html)
+
+    # Multiple blocks
+    if len(open_tags) > 1:
+        findings.append(Finding("jsonld.multiple", f"only one ld+json script allowed in <head>, found {len(open_tags)}"))
+        return findings
+
+    # Open tag but no complete block → likely raw </script> truncation
+    if not raw_blocks:
+        if open_tags:
+            findings.append(Finding(
+                "jsonld.escaping_unsafe",
+                "ld+json open tag found but cannot extract complete block; likely raw </script> in JSON; use <\\/script>",
+            ))
+        elif _LDJSON_SCRIPT_OPEN_RE.search(html):
+            findings.append(Finding("jsonld.position_invalid", "ld+json script must be in <head>, not <body>"))
+        else:
+            findings.append(Finding("jsonld.missing", "no <script type='application/ld+json'> in <head>"))
+        return findings
+
+    # Raw escaping check
+    raw_content = raw_blocks[0]
+    if re.search(r"</script", raw_content, re.IGNORECASE):
+        findings.append(Finding("jsonld.escaping_unsafe", "raw </script substring; must be <\\/script"))
+        return findings
+    if "\u2028" in raw_content or "\u2029" in raw_content:
+        findings.append(Finding("jsonld.escaping_unsafe", "raw U+2028/U+2029 must be \\u2028/\\u2029"))
+        return findings
+
+    # HTMLParser extraction + position
+    parser = _JsonLdExtractor()
+    parser.feed(html)
+    if not parser.scripts:
+        findings.append(Finding("jsonld.parse_error", "extractor failed; check HTML structure"))
+        return findings
+    if len(parser.scripts) > 1:
+        findings.append(Finding("jsonld.multiple", f"only one ld+json script allowed, found {len(parser.scripts)}"))
+        return findings
+
+    content, valid_position = parser.scripts[0]
+    if not valid_position:
+        findings.append(Finding(
+            "jsonld.position_invalid",
+            "JSON-LD must be after <title> and before first <style> or <link rel=stylesheet>",
+        ))
+
+    # JSON parse
+    try:
+        data = json.loads(content)
+    except json.JSONDecodeError as e:
+        findings.append(Finding("jsonld.parse_error", f"json parse failed: {e}"))
+        return findings
+
+    # Required fields
+    if data.get("@context") != "http://schema.org/":
+        findings.append(Finding("jsonld.field_missing", f"@context must be 'http://schema.org/', got {data.get('@context')!r}"))
+    if data.get("@type") != "Report":
+        findings.append(Finding("jsonld.field_missing", f"@type must be 'Report', got {data.get('@type')!r}"))
+    if not isinstance(data.get("name"), str) or not data["name"].strip():
+        findings.append(Finding("jsonld.field_missing", "name must be non-empty string"))
+    if data.get("inLanguage") != "en-US":
+        findings.append(Finding("jsonld.field_missing", f"inLanguage must be 'en-US', got {data.get('inLanguage')!r}"))
+
+    creator = data.get("creator")
+    if not isinstance(creator, dict):
+        findings.append(Finding("jsonld.field_missing", "creator must be object"))
+    else:
+        if creator.get("@type") not in ("Person", "Organization"):
+            findings.append(Finding("jsonld.field_missing", f"creator.@type must be Person|Organization, got {creator.get('@type')!r}"))
+        if not isinstance(creator.get("name"), str) or not creator["name"].strip():
+            findings.append(Finding("jsonld.field_missing", "creator.name must be non-empty string"))
+
+    # additionalProperty
+    aps = data.get("additionalProperty", [])
+    if not isinstance(aps, list):
+        findings.append(Finding("jsonld.field_missing", "additionalProperty must be array"))
+        aps = []
+
+    metadata_version_pv = next(
+        (ap for ap in aps if isinstance(ap, dict) and ap.get("propertyID") == "https://kai.app/ns#metadataVersion"),
+        None,
+    )
+    if not metadata_version_pv:
+        findings.append(Finding("jsonld.field_missing", "additionalProperty missing metadataVersion"))
+    elif metadata_version_pv.get("value") != "1":
+        findings.append(Finding("jsonld.field_missing", f"metadataVersion value must be '1', got {metadata_version_pv.get('value')!r}"))
+
+    # meta ir-hash parity (v5.1: case-sensitive hash validation)
+    meta_open_match = re.search(r'<meta\b[^>]*\bname\s*=\s*["\']ir-hash["\'][^>]*>', html, re.IGNORECASE)
+    meta_content_match = re.search(
+        r'<meta\b(?=[^>]*\bname\s*=\s*["\']ir-hash["\'])[^>]*\bcontent\s*=\s*["\']([^"\']+)["\']',
+        html,
+        re.IGNORECASE,
+    )
+    meta_strict_value: str | None = None
+    if meta_content_match:
+        content_str = meta_content_match.group(1)
+        if _HASH_STRICT_RE.fullmatch(content_str):
+            meta_strict_value = content_str
+        else:
+            findings.append(Finding(
+                "jsonld.hash_invalid",
+                f"meta ir-hash content does not match 'sha256:[a-f0-9]{{16}}' (lowercase), got {content_str!r}",
+            ))
+
+    at_id = data.get("@id")
+    ir_hash_pv = next(
+        (ap for ap in aps if isinstance(ap, dict) and ap.get("propertyID") == "https://kai.app/ns#irHash"),
+        None,
+    )
+
+    if meta_strict_value:
+        meta_hex = meta_strict_value.split(":", 1)[1]
+        expected_id = f"https://kai.app/id/report/{meta_hex}"
+        if not at_id:
+            findings.append(Finding("jsonld.field_missing", f"meta ir-hash present but JSON-LD @id missing; expected {expected_id!r}"))
+        elif at_id != expected_id:
+            findings.append(Finding("jsonld.field_missing", f"@id must be {expected_id!r}, got {at_id!r}"))
+        if not ir_hash_pv:
+            findings.append(Finding("jsonld.field_missing", f"meta ir-hash present but irHash PropertyValue missing; expected value {meta_hex!r}"))
+        elif ir_hash_pv.get("value") != meta_hex:
+            findings.append(Finding("jsonld.field_missing", f"irHash value must be {meta_hex!r}, got {ir_hash_pv.get('value')!r}"))
+    elif not meta_open_match:
+        # No meta → @id and irHash should not be present
+        if at_id is not None:
+            findings.append(Finding("jsonld.field_unexpected", f"meta ir-hash absent but @id={at_id!r} present; remove @id when no meta"))
+        if ir_hash_pv is not None:
+            findings.append(Finding("jsonld.field_unexpected", "meta ir-hash absent but irHash PropertyValue present; remove when no meta"))
+
+    # additionalType prefix
+    add_type = data.get("additionalType")
+    if add_type is not None and not (isinstance(add_type, str) and add_type.startswith("https://kai.app/ns#report-archetype-")):
+        findings.append(Finding("jsonld.field_missing", f"additionalType must start with kai.app/ns#report-archetype- prefix, got {add_type!r}"))
+
+    # propertyID allow-list
+    for ap in aps:
+        if isinstance(ap, dict):
+            pid = ap.get("propertyID", "")
+            if pid and pid not in _ALLOWED_PROPERTY_IDS:
+                findings.append(Finding("jsonld.iri_unwhitelisted", f"unallowed propertyID: {pid!r}"))
+
+    # @id prefix check
+    if at_id is not None and not (isinstance(at_id, str) and at_id.startswith("https://kai.app/id/report/")):
+        findings.append(Finding("jsonld.field_missing", f"@id must start with 'https://kai.app/id/report/', got {at_id!r}"))
+
+    # lang consistency
+    html_lang_match = re.search(r'<html\b[^>]*\blang\s*=\s*["\']([^"\']+)["\']', html, re.IGNORECASE)
+    if html_lang_match:
+        h_lang = html_lang_match.group(1).lower()
+        i_lang = (data.get("inLanguage") or "").lower()
+        if h_lang and i_lang and h_lang != i_lang:
+            if not (h_lang.startswith(i_lang.split("-")[0]) or i_lang.startswith(h_lang.split("-")[0])):
+                findings.append(Finding("jsonld.lang_mismatch", f"<html lang>={h_lang!r} vs inLanguage={i_lang!r}"))
+
+    # theme consistency
+    html_theme_match = re.search(r'data-theme\s*=\s*["\']([^"\']+)["\']', html, re.IGNORECASE)
+    if html_theme_match:
+        h_theme = html_theme_match.group(1)
+        report_theme_pv = next(
+            (ap for ap in aps if isinstance(ap, dict) and ap.get("propertyID") == "https://kai.app/ns#reportTheme"),
+            None,
+        )
+        if not report_theme_pv:
+            findings.append(Finding("jsonld.field_missing", f"data-theme={h_theme!r} present but reportTheme PropertyValue missing"))
+        elif report_theme_pv.get("value") != h_theme:
+            findings.append(Finding("jsonld.theme_mismatch", f"data-theme={h_theme!r} vs reportTheme={report_theme_pv.get('value')!r}"))
+
+    return findings
+
+
+def validate_html_text(
+    html: str,
+    *,
+    standard_shell: bool = True,
+    theme_fidelity: bool = True,
+    kpi_values: bool = True,
+    jsonld_check: bool = True,
+    cover_check: bool = True,
+) -> dict[str, object]:
+    findings: list[Finding] = []
+    animated = is_animated_html(html)
+    if animated:
+        # Animated pages have their own chrome contract; the standard shell IDs
+        # do not apply. Theme fidelity still runs — THEME_MARKERS has no
+        # animated keys, so it is a no-op, and animated visual fidelity is
+        # deliberately left to the recipe plus browser QA rather than locked to
+        # brand-specific colour values.
+        findings.extend(validate_animated_shell(html))
+    if standard_shell and not animated:
+        findings.extend(validate_standard_shell(html))
+    if theme_fidelity:
+        findings.extend(validate_theme_fidelity(html))
+    if kpi_values:
+        findings.extend(validate_kpi_values(html))
+    if jsonld_check:
+        findings.extend(check_jsonld(html))
+    if cover_check:
+        findings.extend(validate_cover(html))
+
+    return {
+        "status": "valid" if not findings else "invalid",
+        "findings": [asdict(finding) for finding in findings],
+        "exit_code": 0 if not findings else 1,
+    }
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Validate final HTML report quality gates.")
+    parser.add_argument("html_path", help="Path to generated HTML report")
+    parser.add_argument("--no-standard-shell", action="store_true", help="Skip standard shell checks")
+    parser.add_argument("--no-theme-fidelity", action="store_true", help="Skip theme fidelity checks")
+    parser.add_argument("--no-kpi-values", action="store_true", help="Skip KPI value checks")
+    parser.add_argument("--no-jsonld-check", action="store_true", help="Skip JSON-LD metadata checks")
+    args = parser.parse_args()
+
+    html_text = Path(args.html_path).read_text(encoding="utf-8")
+    report = validate_html_text(
+        html_text,
+        standard_shell=not args.no_standard_shell,
+        theme_fidelity=not args.no_theme_fidelity,
+        kpi_values=not args.no_kpi_values,
+        jsonld_check=not args.no_jsonld_check,
+    )
+    print(json.dumps(report, ensure_ascii=False, indent=2))
+    sys.exit(int(report["exit_code"]))
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,114 @@
+/* Theme: forest-editorial — Paper-green editorial style · Forest Editorial
+   Light paper canvas + deep forest-green anchor block + gold/orange accents, large rounded cards.
+   Suited to: business/research reports that want a light, readable page but still one dark visual anchor.
+
+   chart palette: #0b6b55 #c7951d #de6d40 #4e6a9f #93a098
+   axis/label on light: #68766e · grid: #dbe5dd
+   (ECharts does not read CSS variables; take chart colors from here)
+*/
+:root {
+  --primary: #0b6b55; --primary-light: #e3f0e9; --accent: #c7951d;
+  --bg: #f5f7f3; --surface: #ffffff; --text: #17211c; --text-muted: #68766e;
+  --border: #dbe5dd; --success: #0b6b55; --warning: #c7951d; --danger: #de6d40;
+  --font-sans: -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', Menlo, monospace;
+  --radius: 17px;
+
+  /* forest-editorial specific: dark anchor block and paper layering */
+  --fe-anchor: #102d27; --fe-anchor-2: #173f35;
+  --fe-paper-2: #eef3ee; --fe-line-strong: #bfcfc3;
+  --fe-radius-xl: 26px;
+  --fe-shadow: 0 20px 55px rgba(26, 48, 38, .09);
+  --fe-shadow-sm: 0 8px 24px rgba(26, 48, 38, .07);
+
+  /* Cover palette: overrides the neutral dark defaults from shared */
+  --cover-bg: linear-gradient(150deg, var(--fe-anchor), var(--fe-anchor-2));
+  --cover-ink: #f3f7f3;
+  --cover-accent: #d2622f;
+  --cover-highlight: #8fce54;
+}
+body { font-family: var(--font-sans); color: var(--text); background: var(--bg); margin: 0; line-height: 1.64; font-variant-numeric: lining-nums tabular-nums; }
+h1 { font-size: 2.1rem; font-weight: 850; color: var(--text); letter-spacing: -.035em; margin-bottom: 1.4rem; }
+h2 { font-size: 1.4rem; font-weight: 800; color: var(--text); letter-spacing: -.02em; margin-top: 2rem; padding-bottom: .45rem; border-bottom: 1px solid var(--border); }
+h3 { font-size: 1.08rem; font-weight: 700; color: var(--text); margin-top: 1.2rem; }
+p { margin: .65rem 0; }
+a { color: var(--primary); text-decoration: none; border-bottom: 1px solid var(--primary-light); }
+a:hover { border-bottom-color: var(--primary); }
+strong { font-weight: 700; }
+blockquote { border-left: 3px solid var(--accent); margin: .8rem 0; padding: .55rem 1.25rem; color: var(--text-muted); background: var(--fe-paper-2); border-radius: 0 var(--radius) var(--radius) 0; }
+
+/* === POST-SHARED OVERRIDE (append AFTER shared.css) === */
+
+/* Paper container: soft large radius + long shadow, distinct from minimal's flat layout */
+.report-wrapper { max-width: 960px; margin: 0 auto; padding: 2.4rem 2rem 3rem; }
+.report-meta { color: var(--text-muted); font-family: var(--font-mono); font-size: .78rem; letter-spacing: .04em; }
+
+/* Deep forest-green anchor block: this theme's signature. The report header holding the h1 is one solid dark block.
+   The standard shell wraps the h1 in .title-row to seat the summary-card button, so both structures must match. */
+.report-wrapper > h1:first-of-type,
+.report-wrapper > .title-row:first-of-type,
+.fe-anchor {
+  background: linear-gradient(150deg, var(--fe-anchor), var(--fe-anchor-2));
+  color: #f3f7f3;
+  border-radius: var(--fe-radius-xl);
+  padding: 2.2rem 2rem 1.9rem;
+  margin: 0 0 1.6rem;
+  box-shadow: var(--fe-shadow);
+  position: relative;
+  overflow: hidden;
+}
+/* Gold eyebrow rule inside the anchor block */
+.report-wrapper > h1:first-of-type::before,
+.report-wrapper > .title-row:first-of-type::before,
+.fe-anchor::before {
+  content: "";
+  position: absolute; left: 2rem; top: 1.35rem;
+  width: 34px; height: 3px; border-radius: 2px;
+  background: var(--accent);
+}
+.report-wrapper > h1:first-of-type,
+.report-wrapper > .title-row:first-of-type { padding-top: 2.6rem; }
+/* An h1 inside the anchor block no longer forms its own block; the summary-card button becomes a light outline on the dark background */
+.report-wrapper > .title-row:first-of-type > h1 {
+  background: none; box-shadow: none; padding: 0; margin: 0; color: inherit; border-radius: 0;
+}
+.report-wrapper > .title-row:first-of-type > .card-mode-btn {
+  background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.3); color: #e8efe9;
+}
+.report-wrapper > .title-row:first-of-type > .card-mode-btn:hover {
+  background: rgba(255,255,255,.22); border-color: rgba(255,255,255,.45); color: #fff;
+}
+
+/* KPI card: theme green goes on the top edge (shared.css locks .kpi-value to a neutral color; not overridden) */
+.kpi-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--primary);
+  border-radius: var(--radius);
+  box-shadow: var(--fe-shadow-sm);
+}
+.kpi-label { color: var(--text-muted); letter-spacing: .08em; }
+.kpi-delta--up { background: var(--primary-light); color: var(--primary); }
+.kpi-delta--down { background: #fbe8df; color: var(--danger); }
+.kpi-delta--info { background: #fff4d6; color: #8a6512; }
+
+/* Table: paper-style header + no heavy borders */
+.table-wrapper { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--fe-shadow-sm); }
+.report-table thead th { background: var(--fe-paper-2); color: var(--text); border-bottom: 1px solid var(--fe-line-strong); font-weight: 700; }
+.report-table td { border-bottom: 1px solid var(--border); }
+
+/* Timeline: green dot + gold date */
+.timeline-dot { background: var(--primary); box-shadow: 0 0 0 4px var(--primary-light); }
+.timeline-date { color: #8a6512; font-family: var(--font-mono); font-size: .8rem; letter-spacing: .04em; }
+.timeline-content { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--fe-shadow-sm); padding: .75rem 1.1rem; }
+
+/* Callout: left color bar + paper background */
+.callout { border-radius: var(--radius); border: 1px solid var(--border); border-left: 4px solid var(--primary); background: var(--surface); box-shadow: var(--fe-shadow-sm); }
+.callout--tip { border-left-color: var(--primary); }
+.callout--warning { border-left-color: var(--accent); }
+.callout--danger { border-left-color: var(--danger); }
+.callout--note { border-left-color: #4e6a9f; }
+
+/* Chart containers and images: follow the large-radius language */
+.diagram-wrapper, .report-image { border-radius: var(--radius); }
+.chart-container { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; box-shadow: var(--fe-shadow-sm); }

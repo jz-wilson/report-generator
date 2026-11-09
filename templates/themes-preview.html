@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>report-creator — Theme Previews</title>
+<style>
+  body{margin:0;font-family:system-ui;background:#F3F4F6}
+  .page{max-width:980px;margin:0 auto;padding:2rem}
+  h1{text-align:center;margin-bottom:2rem;color:#111;font-size:1.5rem}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(440px,1fr));gap:1.5rem}
+  .card{border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.12)}
+  .card-header{padding:1.25rem 1.5rem;display:flex;justify-content:space-between;align-items:flex-start}
+  .card-header h2{margin:0;font-size:1rem;font-weight:700}
+  .card-header .desc{font-size:0.78rem;opacity:0.7;margin-top:2px}
+  .swatches{display:flex;gap:6px;flex-shrink:0}
+  .swatch{width:20px;height:20px;border-radius:50%;border:2px solid rgba(255,255,255,.4)}
+  .card-body{padding:1.5rem}
+  .mini-h2{font-size:1.05rem;font-weight:700;margin:0 0 0.85rem}
+  .mini-kpi{display:flex;gap:0.6rem;margin-bottom:1rem}
+  .mini-kpi-item{flex:1;padding:0.65rem 0.5rem;border-radius:6px;text-align:center}
+  .mini-kpi-label{font-size:0.68rem;opacity:0.6;text-transform:uppercase;letter-spacing:.04em}
+  .mini-kpi-value{font-size:1.3rem;font-weight:700;line-height:1.2;margin:2px 0}
+  .mini-kpi-trend{font-size:0.72rem}
+  .mini-p{font-size:0.83rem;line-height:1.65;margin:0;opacity:0.75}
+</style></head><body>
+<div class="page">
+  <h1>report-creator — Theme Previews</h1>
+  <div class="grid">
+    <div class="card" style="background:#fff">
+      <div class="card-header" style="background:#1A56DB;color:#fff">
+        <div><h2 style="color:#fff">corporate-blue</h2><div class="desc">Professional · Business</div></div>
+        <div class="swatches"><div class="swatch" style="background:#1A56DB"></div><div class="swatch" style="background:#E3EDFF;border-color:#1A56DB"></div><div class="swatch" style="background:#111928"></div></div>
+      </div>
+      <div class="card-body" style="font-family:Inter,system-ui,sans-serif;color:#111928">
+        <div class="mini-h2" style="border-left:4px solid #1A56DB;padding-left:.6rem">Q3 Core Metrics</div>
+        <div class="mini-kpi">
+          <div class="mini-kpi-item" style="background:#E3EDFF"><div class="mini-kpi-label">Revenue</div><div class="mini-kpi-value" style="color:#1A56DB">$2.45M</div><div class="mini-kpi-trend" style="color:#057A55">↑12%</div></div>
+          <div class="mini-kpi-item" style="background:#E3EDFF"><div class="mini-kpi-label">New Clients</div><div class="mini-kpi-value" style="color:#1A56DB">183</div><div class="mini-kpi-trend" style="color:#057A55">↑8%</div></div>
+          <div class="mini-kpi-item" style="background:#E3EDFF"><div class="mini-kpi-label">Achievement</div><div class="mini-kpi-value" style="color:#1A56DB">108%</div><div class="mini-kpi-trend" style="color:#6B7280">→</div></div>
+        </div>
+        <p class="mini-p">South region exceeded target at 115%, best performance of the year. Recommend expanding team headcount in Q4.</p>
+      </div>
+    </div>
+    <div class="card" style="background:#fff;border:1px solid #E5E7EB">
+      <div class="card-header" style="background:#F9FAFB;color:#111827;border-bottom:1px solid #E5E7EB">
+        <div><h2 style="color:#111827">minimal</h2><div class="desc" style="color:#6B7280">Academic · Research</div></div>
+        <div class="swatches"><div class="swatch" style="background:#111827;border-color:#111827"></div><div class="swatch" style="background:#F3F4F6;border-color:#9CA3AF"></div><div class="swatch" style="background:#6B7280;border-color:#6B7280"></div></div>
+      </div>
+      <div class="card-body" style="font-family:Georgia,serif;color:#374151">
+        <div class="mini-h2" style="border-bottom:1px solid #E5E7EB;padding-bottom:.35rem">Key Findings</div>
+        <div class="mini-kpi">
+          <div class="mini-kpi-item" style="background:#F3F4F6"><div class="mini-kpi-label" style="color:#9CA3AF">Sample</div><div class="mini-kpi-value" style="color:#111827">1,200</div><div class="mini-kpi-trend" style="color:#9CA3AF">ppl</div></div>
+          <div class="mini-kpi-item" style="background:#F3F4F6"><div class="mini-kpi-label" style="color:#9CA3AF">Satisfaction</div><div class="mini-kpi-value" style="color:#111827">78%</div><div class="mini-kpi-trend" style="color:#065F46">↑</div></div>
+          <div class="mini-kpi-item" style="background:#F3F4F6"><div class="mini-kpi-label" style="color:#9CA3AF">Products</div><div class="mini-kpi-value" style="color:#111827">6</div><div class="mini-kpi-trend" style="color:#9CA3AF">items</div></div>
+        </div>
+        <p class="mini-p">78% of users report AI assistants improve daily coding efficiency by 30%+. Enterprise demand for on-premise deployment is strong.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header" style="background:#1E1B4B;color:#E2E8F0">
+        <div><h2 style="color:#818CF8;font-family:monospace">dark-tech</h2><div class="desc" style="color:#94A3B8">Dark Tech · Docs</div></div>
+        <div class="swatches"><div class="swatch" style="background:#818CF8"></div><div class="swatch" style="background:#1E1B4B;border-color:#818CF8"></div><div class="swatch" style="background:#A78BFA"></div></div>
+      </div>
+      <div class="card-body" style="background:#0F172A;font-family:Inter,system-ui;color:#E2E8F0">
+        <div class="mini-h2" style="color:#818CF8;font-family:monospace;border-bottom:1px solid #334155;padding-bottom:.35rem">System Status</div>
+        <div class="mini-kpi">
+          <div class="mini-kpi-item" style="background:#1E293B;border:1px solid #334155"><div class="mini-kpi-label" style="color:#94A3B8">Latency</div><div class="mini-kpi-value" style="color:#818CF8">12ms</div><div class="mini-kpi-trend" style="color:#34D399">↓ good</div></div>
+          <div class="mini-kpi-item" style="background:#1E293B;border:1px solid #334155"><div class="mini-kpi-label" style="color:#94A3B8">Uptime</div><div class="mini-kpi-value" style="color:#818CF8">99.9%</div><div class="mini-kpi-trend" style="color:#34D399">↑</div></div>
+          <div class="mini-kpi-item" style="background:#1E293B;border:1px solid #334155"><div class="mini-kpi-label" style="color:#94A3B8">Deploy</div><div class="mini-kpi-value" style="color:#818CF8">v2.4</div><div class="mini-kpi-trend" style="color:#94A3B8">Stable</div></div>
+        </div>
+        <p class="mini-p" style="color:#94A3B8">Current version deployed to production. All health checks passing, no active alerts.</p>
+      </div>
+    </div>
+    <div class="card" style="background:#161B22;border:1px solid #30363D">
+      <div class="card-header" style="background:#0D1117;color:#E6EDF3;border-bottom:1px solid #30363D">
+        <div><h2 style="color:#58A6FF">dark-board</h2><div class="desc" style="color:#8B949E">Dark Board · Architecture</div></div>
+        <div class="swatches"><div class="swatch" style="background:#58A6FF;border-color:#58A6FF"></div><div class="swatch" style="background:#3FB950;border-color:#3FB950"></div><div class="swatch" style="background:#BC8CFF;border-color:#BC8CFF"></div><div class="swatch" style="background:#D29922;border-color:#D29922"></div></div>
+      </div>
+      <div class="card-body" style="background:#161B22;font-family:Inter,system-ui;color:#E6EDF3;padding:1rem 1.5rem">
+        <div class="mini-h2" style="color:#58A6FF;border-left:3px solid #58A6FF;padding-left:.6rem;margin-bottom:.6rem">System Health</div>
+        <div class="mini-kpi">
+          <div class="mini-kpi-item" style="background:#0D1117;border:1px solid #3FB950;border-top:2px solid #3FB950"><div class="mini-kpi-label" style="color:#8B949E">API</div><div class="mini-kpi-value" style="color:#3FB950">99.9%</div><div class="mini-kpi-trend" style="color:#3FB950">↑</div></div>
+          <div class="mini-kpi-item" style="background:#0D1117;border:1px solid #D29922;border-top:2px solid #D29922"><div class="mini-kpi-label" style="color:#8B949E">P99</div><div class="mini-kpi-value" style="color:#D29922">142ms</div><div class="mini-kpi-trend" style="color:#8B949E">→</div></div>
+          <div class="mini-kpi-item" style="background:#0D1117;border:1px solid #BC8CFF;border-top:2px solid #BC8CFF"><div class="mini-kpi-label" style="color:#8B949E">Deploy</div><div class="mini-kpi-value" style="color:#BC8CFF">v3.1</div><div class="mini-kpi-trend" style="color:#3FB950">new</div></div>
+        </div>
+        <p class="mini-p" style="color:#8B949E">All services nominal. v3.1 deployed across all regions with zero downtime.</p>
+      </div>
+    </div>
+    <div class="card" style="background:#FAFAFA;border:1px solid #E0E0E8">
+      <div class="card-header" style="background:linear-gradient(135deg,#E63946,#F4A261);color:#fff">
+        <div><h2 style="color:#fff">data-story</h2><div class="desc" style="opacity:.85">Data Narrative · Annual</div></div>
+        <div class="swatches"><div class="swatch" style="background:#E63946"></div><div class="swatch" style="background:#F4A261;border-color:#F4A261"></div><div class="swatch" style="background:#1A1A2E;border-color:#1A1A2E"></div></div>
+      </div>
+      <div class="card-body" style="font-family:Inter,system-ui;color:#1A1A2E">
+        <div class="mini-h2" style="padding-left:1rem;position:relative;margin-bottom:.85rem">
+          <span style="position:absolute;left:0;top:.1em;bottom:.1em;width:4px;background:linear-gradient(135deg,#E63946,#F4A261);border-radius:2px"></span>
+          Growth Highlights
+        </div>
+        <div class="mini-kpi">
+          <div class="mini-kpi-item" style="background:#F0F0F0"><div class="mini-kpi-label">Revenue</div><div class="mini-kpi-value" style="background:linear-gradient(135deg,#E63946,#F4A261);-webkit-background-clip:text;-webkit-text-fill-color:transparent">$8.2M</div><div class="mini-kpi-trend" style="color:#2D6A4F">↑34%</div></div>
+          <div class="mini-kpi-item" style="background:#F0F0F0"><div class="mini-kpi-label">Users</div><div class="mini-kpi-value" style="background:linear-gradient(135deg,#E63946,#F4A261);-webkit-background-clip:text;-webkit-text-fill-color:transparent">52K</div><div class="mini-kpi-trend" style="color:#2D6A4F">↑61%</div></div>
+          <div class="mini-kpi-item" style="background:#F0F0F0"><div class="mini-kpi-label">NPS</div><div class="mini-kpi-value" style="background:linear-gradient(135deg,#E63946,#F4A261);-webkit-background-clip:text;-webkit-text-fill-color:transparent">72</div><div class="mini-kpi-trend" style="color:#E76F51">↑12</div></div>
+        </div>
+        <p class="mini-p">Year marked by exponential user growth. Q4 NPS reached 72, a new all-time high driven by onboarding improvements.</p>
+      </div>
+    </div>
+    <div class="card" style="background:#F8F4EE;border:1px solid #D4CFC8">
+      <div class="card-header" style="background:#EDE8E0;color:#1A1A1A;border-bottom:2px solid #1A1A1A">
+        <div><h2 style="color:#1A1A1A;font-family:Georgia,serif;font-weight:900">newspaper</h2><div class="desc" style="color:#7A7A7A;font-family:system-ui;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em">Editorial · Industry · Newsletter</div></div>
+        <div class="swatches"><div class="swatch" style="background:#1A1A1A;border-color:#1A1A1A"></div><div class="swatch" style="background:#C0392B;border-color:#C0392B"></div><div class="swatch" style="background:#F8F4EE;border-color:#D4CFC8"></div></div>
+      </div>
+      <div class="card-body" style="font-family:Georgia,serif;color:#1A1A1A">
+        <div class="mini-h2" style="border-top:2px solid #1A1A1A;padding-top:.4rem;font-weight:700;font-size:1rem;margin-bottom:.85rem">This Quarter's Insights</div>
+        <div class="mini-kpi">
+          <div class="mini-kpi-item" style="background:#F8F4EE;border:1px solid #D4CFC8;border-top:3px solid #1A1A1A;border-radius:0"><div class="mini-kpi-label" style="color:#7A7A7A;font-family:system-ui;font-size:.65rem;letter-spacing:.08em;text-transform:uppercase">Readership</div><div class="mini-kpi-value" style="color:#C0392B;font-weight:800;font-size:1.25rem">18.4K</div><div class="mini-kpi-trend" style="color:#27AE60">↑22%</div></div>
+          <div class="mini-kpi-item" style="background:#F8F4EE;border:1px solid #D4CFC8;border-top:3px solid #1A1A1A;border-radius:0"><div class="mini-kpi-label" style="color:#7A7A7A;font-family:system-ui;font-size:.65rem;letter-spacing:.08em;text-transform:uppercase">Open Rate</div><div class="mini-kpi-value" style="color:#C0392B;font-weight:800;font-size:1.25rem">54%</div><div class="mini-kpi-trend" style="color:#27AE60">↑</div></div>
+          <div class="mini-kpi-item" style="background:#F8F4EE;border:1px solid #D4CFC8;border-top:3px solid #1A1A1A;border-radius:0"><div class="mini-kpi-label" style="color:#7A7A7A;font-family:system-ui;font-size:.65rem;letter-spacing:.08em;text-transform:uppercase">Shares</div><div class="mini-kpi-value" style="color:#C0392B;font-weight:800;font-size:1.25rem">1.2K</div><div class="mini-kpi-trend" style="color:#27AE60">↑</div></div>
+        </div>
+        <p class="mini-p" style="font-size:.83rem;color:#7A7A7A">Open rate of 54% far outpaces the 21% industry average. Curated industry analysis drives strong reader engagement.</p>
+      </div>
+    </div>
+    <div class="card" style="background:#fff;border:1px solid #E5E7EB">
+      <div class="card-header" style="background:#F7F5F1;color:#202020;border-bottom:1px solid #E5E7EB">
+        <div><h2 style="color:#202020;font-family:'Playfair Display',Georgia,serif;font-weight:900">regular-lumen</h2><div class="desc" style="color:#949494">Editorial · Serif · Lumen</div></div>
+        <div class="swatches"><div class="swatch" style="background:#335490;border-color:#335490"></div><div class="swatch" style="background:#3B82F6;border-color:#3B82F6"></div><div class="swatch" style="background:#F7F5F1;border-color:#E5E7EB"></div></div>
+      </div>
+      <div class="card-body" style="font-family:'Playfair Display',Georgia,serif;color:#202020">
+        <div class="mini-h2" style="border-bottom:1px solid #E5E7EB;padding-bottom:.35rem">Quarterly Review</div>
+        <div class="mini-kpi">
+          <div class="mini-kpi-item" style="background:#FAFAF8;border:1px solid #E5E7EB"><div class="mini-kpi-label" style="color:#949494">Revenue</div><div class="mini-kpi-value" style="color:#335490">$4.1M</div><div class="mini-kpi-trend" style="color:#059669">↑19%</div></div>
+          <div class="mini-kpi-item" style="background:#FAFAF8;border:1px solid #E5E7EB"><div class="mini-kpi-label" style="color:#949494">Retention</div><div class="mini-kpi-value" style="color:#335490">91%</div><div class="mini-kpi-trend" style="color:#059669">↑</div></div>
+          <div class="mini-kpi-item" style="background:#FAFAF8;border:1px solid #E5E7EB"><div class="mini-kpi-label" style="color:#949494">Markets</div><div class="mini-kpi-value" style="color:#335490">7</div><div class="mini-kpi-trend" style="color:#949494">regions</div></div>
+        </div>
+        <p class="mini-p">A refined serif layout for long-form reports and briefings. Revenue climbed 19% while retention held above 90%.</p>
+      </div>
+    </div>
+    <div class="card" style="background:#fff">
+      <div class="card-header" style="background:#102d27;color:#f3f7f3">
+        <div><h2 style="color:#f3f7f3">forest-editorial</h2><div class="desc" style="color:#a9c3b3">Paper-Green · Report Cover</div></div>
+        <div class="swatches"><div class="swatch" style="background:#102d27;border-color:#8fce54"></div><div class="swatch" style="background:#d2622f;border-color:#d2622f"></div><div class="swatch" style="background:#8fce54;border-color:#8fce54"></div></div>
+      </div>
+      <div class="card-body" style="background:#102d27;color:#f3f7f3;font-family:system-ui">
+        <div class="desc" style="font-family:'JetBrains Mono',monospace;font-size:.66rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#d2622f;opacity:1;margin-bottom:.75rem">FOREST EDITORIAL · PAPER-GREEN REPORT THEME</div>
+        <div style="font-size:1.35rem;font-weight:900;line-height:1.14;letter-spacing:-.02em;margin-bottom:1.05rem">Build the <span style="color:#8fce54">business semantic core</span> first,<br>then let AI run global fulfillment</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,.18);border-radius:4px;overflow:hidden">
+          <div style="background:#d2622f;padding:.6rem .55rem"><div style="font-family:'JetBrains Mono',monospace;font-size:.55rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.85">Core thesis</div><div style="font-size:.78rem;font-weight:800;margin-top:.22rem">Ontology is the start</div></div>
+          <div style="background:#102d27;padding:.6rem .55rem"><div style="font-family:'JetBrains Mono',monospace;font-size:.55rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.7">Business goal</div><div style="font-size:.78rem;font-weight:800;margin-top:.22rem">Minute-level response</div></div>
+          <div style="background:#102d27;padding:.6rem .55rem"><div style="font-family:'JetBrains Mono',monospace;font-size:.55rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.7">Delivery cadence</div><div style="font-size:.78rem;font-weight:800;margin-top:.22rem">One loop a week</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div></body></html>

@@ -1,0 +1,3 @@
+case_id,lang,report_class,source_path,ir_path,html_path,context_path,notes
+en-ops-weekly,en,mixed,evals/cases/en-ops-weekly/source.md,evals/cases/en-ops-weekly/report.report.md,tests/fixtures/color_system_report.html,evals/cases/en-ops-weekly/noise-context.md,Mixed status update with real numbers and one timeline.
+jsonld-contract,en,mixed,evals/cases/en-ops-weekly/source.md,evals/cases/en-ops-weekly/report.report.md,tests/fixtures/jsonld_valid_report.html,evals/cases/en-ops-weekly/noise-context.md,JSON-LD metadata contract validation case.
