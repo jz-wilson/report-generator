@@ -28,7 +28,7 @@ When invoked as `/report [flags] [content]`, parse flags first:
 | `--plan "topic"` | Write `.report.md` IR only. Stop after saving it. |
 | `--generate [file]` | Render one `.report.md` IR to HTML. With no file given, treat as IR from context: extract exactly one valid IR block from context. Never render the surrounding conversation. |
 | `--review [file]` | Refine an existing HTML report with `references/review-checklist.md`. |
-| `--review [file] --focus <pass>` | Run one design pass instead: `typeset`, `layout`, `color`, `distill`, `clarify`, `polish`, or `critique` (diagnose only). See `references/design-refine.md`. |
+| `--review [file] --focus <pass>` | Run one design pass instead of the checklist: `critique` and `audit` diagnose only; `typeset`, `layout`, `color`, `distill`, `clarify`, `harden`, `adapt`, `motion`, and `polish` edit. See `references/design-refine.md`. |
 | `--themes` | Write the themes preview HTML. |
 | `--from <file>` | If the file starts with frontmatter, treat as IR; otherwise create IR, then render. |
 | `--theme <name>` | Override the theme. Built-ins: `corporate-blue`, `minimal`, `dark-tech`, `dark-board`, `data-story`, `newspaper`, `regular-lumen`, `forest-editorial`. |
@@ -51,7 +51,7 @@ Load reference files minimally by route; do not read every reference by default.
 | `--plan` | `references/spec-loading-matrix.md`, `references/plan-flow.md`, `references/theme-routing.md` | `references/regular-report-content-rules.md` for periodic reports |
 | `--generate` | `references/generate-flow.md`, `references/html-shell-template.md` + every `references/html-shell/*.md` **except `cover.md`**, `references/theme-css.md`, `references/review-checklist.md`, `references/output-metadata.md` | `references/html-shell/cover.md` when `theme: forest-editorial` or `cover: hero`; `references/rendering-rules.md` then only the `references/rendering/*.md` files required by the IR; `references/anti-patterns.md` for visual anchors; `references/diagram-decision-rules.md` for diagrams; `references/regular-report-content-rules.md` for periodic reports |
 | animated (`animations: scrollytelling\|iridescence`) | `references/animated-shell/overview.md` + the one mode file (`scrollytelling.md` or `iridescence.md`), `references/output-metadata.md` | `references/anti-patterns.md`; skip `html-shell*` and `theme-css.md` entirely |
-| `--review` | `references/review-checklist.md` | `references/review-report-template.md` if a structured change summary is requested; `references/design-refine.md` when `--focus` is given |
+| `--review` | `references/review-checklist.md` | `references/review-report-template.md` if a structured change summary is requested; `references/design-refine.md` plus the one file it names when `--focus` is given |
 | custom theme/template | `references/theme-css.md`, `references/toc-and-template.md` | custom theme `reference.md` or `theme.css` |
 
 Load `references/spec-loading-matrix.md` before `--plan` and `--generate` as a silent classifier. It covers optional archetypes: `brief`, `research`, `comparison`, `update`.
@@ -128,7 +128,7 @@ When frontmatter has `animations: scrollytelling` or `animations: iridescence`, 
 ## `--review` Flow
 
 1. Read the HTML file.
-2. Load `references/review-checklist.md`. With `--focus <pass>`, also load `references/design-refine.md` and run only that pass.
+2. Load `references/review-checklist.md`. With `--focus <pass>`, also load `references/design-refine.md` and the one file it names, and run only that pass.
 3. Apply hard rules automatically; apply AI-advised rules only when confidence is high and factual accuracy is preserved.
 4. One-pass automatic refinement; no confirmation window.
 5. Use `references/review-report-template.md` when the user wants a structured summary.

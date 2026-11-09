@@ -2,6 +2,7 @@
 
 Steps for `--plan` mode:
 
+0. **Brief check.** Settle the reader before writing. From the request and source, work out who reads this and in what situation, the question or decision it must serve (`audience`, `decision_goal`), what evidence is on hand, and what must or must not appear (`must_include`, `must_avoid`). Assert the likely reading and invite correction. Ask only about material gaps, in one round of at most three short questions, and only when the report is high-stakes, ambiguous, or the source leaves these open. Never ask for colors, fonts, or style. Record anything undecided as an open item or `[INSERT VALUE]`; never invent evidence, numbers, or sources.
 1. Detect language and suggest theme (see `references/theme-routing.md`).
 2. Classify `report_class`; optionally add `archetype` only when the report clearly matches `brief`, `research`, `comparison`, or `update`.
 3. For `regular-lumen` or periodic keywords, load `references/regular-report-content-rules.md`.

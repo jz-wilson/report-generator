@@ -61,15 +61,36 @@ def test_review_report_template_exists_and_is_documented():
     assert "review-report-template.md" in skill
 
 
-def test_design_refine_pass_is_routed_and_indexed():
+def test_design_refine_passes_are_routed_and_indexed():
     skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
     index = (ROOT / "references" / "INDEX.md").read_text(encoding="utf-8")
-    refine = (ROOT / "references" / "design-refine.md").read_text(encoding="utf-8")
-    passes = ["typeset", "layout", "color", "distill", "clarify", "polish", "critique"]
+    entry = (ROOT / "references" / "design-refine.md").read_text(encoding="utf-8")
+    passes = {
+        "references/design-refine/critique.md": ["critique"],
+        "references/design-refine/audit.md": ["audit"],
+        "references/design-refine/passes.md": [
+            "typeset", "layout", "color", "distill", "clarify",
+            "harden", "adapt", "motion", "polish",
+        ],
+    }
 
     assert "--focus <pass>" in skill
     assert "references/design-refine.md" in skill
     assert "`design-refine.md`" in index
-    for name in passes:
-        assert f"### `{name}`" in refine, f"design-refine.md is missing the {name} pass"
-        assert name in skill, f"SKILL.md should name the {name} pass"
+    for path, names in passes.items():
+        assert (ROOT / path).is_file(), f"missing {path}"
+        assert f"`{path}`" in entry, f"design-refine.md should route to {path}"
+        assert f"`{path.removeprefix('references/')}`" in index, f"INDEX.md should list {path}"
+        body = (ROOT / path).read_text(encoding="utf-8")
+        for name in names:
+            assert name in skill, f"SKILL.md should name the {name} pass"
+            assert f"`{name}`" in entry, f"design-refine.md should list the {name} pass"
+            if path.endswith("passes.md"):
+                assert f"## `{name}`" in body, f"passes.md is missing the {name} pass"
+
+
+def test_plan_flow_has_a_brief_check_that_never_asks_for_style():
+    plan = (ROOT / "references" / "plan-flow.md").read_text(encoding="utf-8")
+    assert "Brief check" in plan
+    assert "audience" in plan and "decision_goal" in plan
+    assert "Never ask for colors, fonts, or style" in plan

@@ -28,7 +28,10 @@ Use this index to load only the reference files needed for the current route. `S
 | `spec-loading-matrix.md` | Before `--plan` and `--generate` | Silent classifier for `brief`, `research`, `comparison`, and `update` archetypes |
 | `toc-and-template.md` | TOC, custom template, or theme override work | TOC link rules, custom template placeholders, theme override injection |
 | `design-quality.md` | Design judgment is needed beyond deterministic shell/component rules | Visual quality baseline, typography, color discipline, rhythm guidance |
-| `design-refine.md` | `--review --focus <pass>` or a typography, layout, color, simplify, copy, or polish request | Focused design passes (`typeset`, `layout`, `color`, `distill`, `clarify`, `polish`, `critique`), Read-surface rules, report-specific quality floor |
+| `design-refine.md` | `--review --focus <pass>` or a design pass is requested | Pass router, surface modes (Read, Operate, Persuade, Experience), ground rules, P0–P3 severity, report-specific quality floor |
+| `design-refine/critique.md` | `--focus critique` | Diagnose-only design critique: heuristic score, cognitive-load checklist, reader personas, priority issues |
+| `design-refine/audit.md` | `--focus audit` | Diagnose-only technical audit: accessibility, performance, theming, responsive and export, integrity (score out of 20) |
+| `design-refine/passes.md` | `--focus typeset\|layout\|color\|distill\|clarify\|harden\|adapt\|motion\|polish` | The editing passes: assess, thesis, apply, verify |
 | `animated-shell/overview.md` | `animations: scrollytelling\|iridescence` or user asks for a scrollytelling or iridescence page | Animated mode pipeline invariants, IR mapping, frame chrome (paging + play mode), gate profile |
 | `animated-shell/scrollytelling.md` | Animated mode = scrollytelling | Dark GSAP scroll-narrative recipe: 3-CDN SRI contract, design system, section patterns, hard rules, helpers |
 | `animated-shell/iridescence.md` | Animated mode = iridescence | Light WebGL-hero recipe: zero-CDN contract, verbatim shader, fallback/DPR/IO rules |

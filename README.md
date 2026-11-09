@@ -269,7 +269,7 @@ The current release is **v1.28.1**. Download source bundles from GitHub Releases
 | `/report --plan "topic"` | Create a `.report.md` outline first |
 | `/report --generate file.report.md` | Render an outline to HTML |
 | `/report --review file.html` | Refine an existing report |
-| `/report --review file.html --focus typeset` | Run one design pass: `typeset`, `layout`, `color`, `distill`, `clarify`, `polish`, or `critique` |
+| `/report --review file.html --focus critique` | Run one design pass: `critique` or `audit` (diagnose only), or `typeset`, `layout`, `color`, `distill`, `clarify`, `harden`, `adapt`, `motion`, `polish` (edit) |
 | `/report --themes` | Preview the bundled theme gallery |
 | `/report --bundle --from file.md` | Offline HTML with inlined CDN assets |
 | `/report --theme <name> --from file.md` | Use a built-in or custom theme |
@@ -303,7 +303,23 @@ Run `--review` to improve existing reports with 14 checkpoints:
 /report --review market-analysis.html
 ```
 
-**Design passes:** add `--focus <pass>` to run one focused design pass instead of the full checklist. Passes are adapted from [Impeccable](https://impeccable.style/) and use markdown only: `typeset` (hierarchy and reading), `layout` (order and rhythm), `color` (meaning and contrast), `distill` (cut what does not earn its place), `clarify` (copy), `polish` (final pass), and `critique` (scored diagnosis, no edits). See `references/design-refine.md`.
+**Design passes:** add `--focus <pass>` to run one focused design pass instead of the checklist. The passes are adapted from [Impeccable](https://impeccable.style/) and use markdown only; each report is treated as a reading, scanning, persuading, or experience surface, and the pass scales its ambition to that.
+
+| Pass | What it does |
+|---|---|
+| `critique` | Design review, no edits: heuristic score, cognitive-load checklist, reader personas, issues ranked P0–P3 |
+| `audit` | Technical review, no edits: accessibility, performance, theming, responsive and export, integrity, scored out of 20 |
+| `typeset` | Hierarchy, size, line length, rhythm |
+| `layout` | Reading order, grouping, spacing |
+| `color` | Color roles, contrast, chart and status color |
+| `distill` | Cut what does not earn its place |
+| `clarify` | Headings, labels, terms, units |
+| `harden` | Long, empty, many, and missing data; scripts blocked; print |
+| `adapt` | Phone, print, and image export |
+| `motion` | Purpose, timing, and reduced motion for animation |
+| `polish` | Final pass before sharing |
+
+`--plan` also runs a short brief check on the reader and the decision before writing the outline. See `references/design-refine.md`.
 
 ```
 /report --review market-analysis.html --focus layout
