@@ -276,7 +276,7 @@ class TestCheckJsonldConsistency:
     def test_lang_mismatch(self):
         """#20"""
         script = _jsonld_script(_valid_jsonld(in_language="en-US"))
-        html = _wrap(head_content=script, lang="en-US")
+        html = _wrap(head_content=script, lang="fr")
         findings = check_jsonld(html)
         assert any(f.code == "jsonld.lang_mismatch" for f in findings)
 

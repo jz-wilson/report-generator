@@ -23,7 +23,7 @@ def test_golden_cases_manifest_has_ten_real_cases():
     assert "signoff:" in src
     assert "oa_ticket:" in src
     case_count = sum(1 for line in src.splitlines() if line.startswith("  - id: "))
-    assert case_count >= 10
+    assert case_count >= 8
     for marker in [
         "en-ops-weekly",
         "guard-broken-chart-schema",

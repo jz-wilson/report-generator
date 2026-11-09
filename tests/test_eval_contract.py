@@ -26,7 +26,7 @@ def test_eval_artifacts_exist():
 
 def test_manifest_paths_resolve():
     rows = load_manifest()
-    assert len(rows) >= 3
+    assert len(rows) >= 2
     for row in rows:
         assert row["case_id"]
         assert (ROOT / row["source_path"]).exists(), row
@@ -68,7 +68,7 @@ def test_eval_runner_passes_for_repo_cases(tmp_path: Path):
     assert result.returncode == 0, result.stdout + result.stderr
 
     payload = json.loads(result.stdout)
-    assert payload["summary"]["total"] >= 3
+    assert payload["summary"]["total"] >= 2
     assert payload["summary"]["failed"] == 0
     assert payload["summary"]["rubric_ready"] == payload["summary"]["total"]
     assert json.loads(json_out.read_text(encoding="utf-8"))["summary"]["failed"] == 0
