@@ -62,7 +62,7 @@ def test_doc_sync_checker_passes_for_valid_fixture():
         ),
         readme_en=(
             "/report --review\n"
-            "13-checkpoint review system\n"
+            "14-checkpoint review system\n"
             "silent final review\n"
             "review-report-template.md\n"
             "Capability Growth Must Reduce Context Load\n"

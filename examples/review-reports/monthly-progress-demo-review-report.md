@@ -3,7 +3,7 @@
 **Target file:** [`examples/en/monthly-progress.html`](../en/monthly-progress.html)
 **Review mode:** `manual demo`
 **Language:** `en`
-**Review scope:** `13-checkpoint review system` (this demo triggers the 8 content checkpoints listed below)
+**Review scope:** `14-checkpoint review system` (this demo triggers the 8 content checkpoints listed below)
 
 ## Summary
 

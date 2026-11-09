@@ -296,7 +296,7 @@ The current release is **v1.28.1**. Download source bundles from GitHub Releases
 
 ### Review Mode
 
-Run `--review` to improve existing reports with 13 checkpoints:
+Run `--review` to improve existing reports with 14 checkpoints:
 
 ```
 /report --review market-analysis.html
@@ -314,14 +314,15 @@ If you want a structured change summary after review, use `references/review-rep
 
 `--generate` also runs this checklist as a **silent final review** before writing HTML.
 
-This review flow is the built-in **13-checkpoint review system**.
+This review flow is the built-in **14-checkpoint review system**.
 
-**13 Checkpoints:**
+**14 Checkpoints:**
 - KPI value length
 - Badge coverage
 - Summary card poster hierarchy
 - Timeline content validity
 - Export menu completeness
+- JSON-LD metadata
 - BLUF opening (Bottom Line Up Front)
 - Heading stack logic
 - Anti-template section headings
@@ -438,7 +439,7 @@ python scripts/html_quality_gate.py report.html
 - **Zero dependencies** — single `.html` file, works offline with `--bundle`
 - **8 built-in themes** — corporate-blue, minimal, dark-tech, dark-board, data-story, newspaper, regular-lumen, forest-editorial
 - **9 component types** — KPIs, charts (ECharts), tables, timelines, diagrams, code blocks, callouts, images, lists
-- **Report Review System** — 13-checkpoint automatic refinement
+- **Report Review System** — 14-checkpoint automatic refinement
 - **AI-readable output** — 3-layer machine-readable structure for downstream agents
 - **Animated render mode** — `animations: scrollytelling` (dark GSAP scroll narrative) or `animations: iridescence` (light WebGL-shader hero, zero CDN); single-file animated web page with keyboard paging and fullscreen play mode, validated by the animated profile of `html_quality_gate.py`
 - **Full-screen cover** — `forest-editorial` always renders one; any other theme opts in with `cover: hero`. Eyebrow, display headline with one `[[accent phrase]]`, lead, provenance chips and a three-card conclusion strip, validated by the cover assertions in `html_quality_gate.py`

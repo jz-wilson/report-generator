@@ -12,9 +12,9 @@ The report review system keeps only the rules that fit `kai-report-creator`'s op
 - the AI can fix it directly with a rewrite or structural adjustment
 - the rule does not depend on outside human feedback or image-level interpretation
 
-The system has **13 checkpoints**:
+The system has **14 checkpoints**:
 
-- **Category 0: Visual Hard Rules (5)** — auto-apply during the silent final pass
+- **Category 0: Visual Hard Rules (6)** — auto-apply during the silent final pass
 - **Category 1: Hard Rules (5)** — auto-apply when violated
 - **Category 2: AI-Advised Rules (3)** — apply only when confidence is high
 
@@ -248,7 +248,7 @@ These ideas were considered and intentionally excluded from the automated system
 
 Run the review in this order:
 
-0. **Visual Hard Rules** (KPI Value Length, Badge Coverage, Timeline Content Validity, Export Menu Completeness)
+0. **Visual Hard Rules** (KPI Value Validity, Badge Coverage, Summary Card Poster Hierarchy, Timeline Content Validity, Export Menu Completeness, JSON-LD Metadata)
 1. BLUF Opening
 2. Heading Stack Logic
 3. Anti-Template Section Headings

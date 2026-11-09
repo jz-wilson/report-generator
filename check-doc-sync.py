@@ -61,7 +61,7 @@ def evaluate(root: Path) -> list[RuleResult]:
         readme_en,
         [
             "/report --review",
-            "13-checkpoint review system",
+            "14-checkpoint review system",
             "silent final review",
             "review-report-template.md",
         ],

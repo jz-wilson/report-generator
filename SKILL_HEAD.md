@@ -15,7 +15,7 @@ Generate zero-dependency single-file HTML reports that mix text, charts, KPIs, t
 - **Full-screen cover** — forest-editorial renders a cover by default; other themes opt in with `cover: hero`
 - **8 built-in themes** — corporate-blue, minimal, dark-tech, dark-board, data-story, newspaper, regular-lumen, forest-editorial
 - **9 component types** — KPI, chart, table, timeline, flow diagram, code block, callout, image, list
-- **Report Review system** — 13 checkpoints for automatic refinement
+- **Report Review system** — 14 checkpoints for automatic refinement
 - **AI-readable output** — three-layer machine-readable structure
 - **Animated render mode** — `animations: scrollytelling` (dark GSAP scroll narrative) or `animations: iridescence` (light WebGL iridescent landing page, no CDN)
 - **Mobile responsive**

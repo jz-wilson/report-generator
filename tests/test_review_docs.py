@@ -38,7 +38,7 @@ def test_readmes_expose_review_mode_consistently():
     readme_en = read("README.md")
 
     assert "/report --review" in readme_en
-    assert "13-checkpoint" in readme_en
+    assert "14-checkpoint" in readme_en
     assert "silent final review" in readme_en
     assert "review-report-template.md" in readme_en
 
