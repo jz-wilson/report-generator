@@ -1,9 +1,9 @@
 # Report Review Report
 
-**Target file:** [`examples/en/business-report.html`](/Users/song/projects/report-creator/examples/en/business-report.html)
+**Target file:** [`examples/en/business-report.html`](../en/business-report.html)
 **Review mode:** `manual demo`
 **Language:** `en`
-**Review scope:** `8-checkpoint review system`
+**Review scope:** `13-checkpoint review system` (this demo triggers the 8 content checkpoints listed below)
 
 ## Summary
 
@@ -68,8 +68,8 @@
 
 ## Files
 
-- Before: [`examples/en/business-report.html`](/Users/song/projects/report-creator/examples/en/business-report.html)
-- After: [`examples/en/business-report-reviewed-demo.html`](/Users/song/projects/report-creator/examples/en/business-report-reviewed-demo.html)
+- Before: [`examples/en/business-report.html`](../en/business-report.html)
+- After: [`examples/en/business-report-reviewed-demo.html`](../en/business-report-reviewed-demo.html)
 
 ## Reviewer Notes
 

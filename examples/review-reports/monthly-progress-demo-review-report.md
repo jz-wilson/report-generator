@@ -1,9 +1,9 @@
 # Report Review Report
 
-**Target file:** [`examples/en/monthly-progress.html`](/Users/song/projects/report-creator/examples/en/monthly-progress.html)
+**Target file:** [`examples/en/monthly-progress.html`](../en/monthly-progress.html)
 **Review mode:** `manual demo`
 **Language:** `en`
-**Review scope:** `8-checkpoint review system`
+**Review scope:** `13-checkpoint review system` (this demo triggers the 8 content checkpoints listed below)
 
 ## Summary
 
@@ -62,8 +62,8 @@
 
 ## Files
 
-- Before: [`examples/en/monthly-progress.html`](/Users/song/projects/report-creator/examples/en/monthly-progress.html)
-- After: [`examples/en/monthly-progress-reviewed-demo.html`](/Users/song/projects/report-creator/examples/en/monthly-progress-reviewed-demo.html)
+- Before: [`examples/en/monthly-progress.html`](../en/monthly-progress.html)
+- After: [`examples/en/monthly-progress-reviewed-demo.html`](../en/monthly-progress-reviewed-demo.html)
 - Screenshot before: [/tmp/report-demo-before.png](/tmp/report-demo-before.png)
 - Screenshot after: [/tmp/report-demo-after.png](/tmp/report-demo-after.png)
 
