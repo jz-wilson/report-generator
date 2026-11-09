@@ -64,13 +64,13 @@ When adding a new capability, the first question is not "what else can we stuff 
 
 report-creator should prefer three moves:
 
-- **Thin routing in `SKILL.md`.** Keep the skill file as a router plus contract boundary. Load only the files needed for the selected path. Do not drag long planning conversations directly into the render phase.
+- **Thin routing in `SKILL.md`.** Keep the skill file as a router plus contract boundary. Load only the files needed for the selected path. Do not carry long planning conversations into the render phase.
 - **Structured compression over raw prose.** Prefer `.report.md`, `BRIEF.json`-style briefs, explicit contracts, and routing metadata over more prompt paragraphs. If information matters repeatedly, give it a field, a schema, or a deterministic transform.
 - **Move quality checks off the hot path.** If a new quality mechanism increases generation-time cognitive load, it belongs in guard validation, post-render review, or evals instead of the prompt chain.
 
 This is not minimalism for its own sake. It is reliability work. Prompt bloat makes routing fuzzy, hides the real contract, and causes the model to drop constraints exactly when rendering needs precision.
 
-### 3. Silicon-Carbon Collaboration Design
+### 3. Human-AI Collaboration Design
 
 report-creator is designed for human-AI collaboration at both input and output ends.
 
@@ -106,7 +106,7 @@ Layer 3 — data-component data-raw         Component-level: raw KPI/chart/table
 
 An AI agent reads Layer 1 for a 3-second overview, drills to Layer 2 for section-level understanding, reaches Layer 3 only for specific data.
 
-**Progressive disclosure for both species:** IR reveals structure to humans; HTML reveals data to machines. The same principle applied twice — once for carbon-based readers, once for silicon-based ones.
+**Progressive disclosure for both species:** IR reveals structure to humans; HTML reveals data to machines. The same principle applied twice — once for human readers, once for machine readers.
 
 ### 4. Visual Rhythm as Cognitive Pacing
 
@@ -495,7 +495,7 @@ Warm business theme with subtle gradients. Default for executive-facing reports.
 ```
 3. Run: `/report --theme your-theme --from file.md`
 
-**Example theme bundled:** `themes/warm-editorial/`
+**Example theme bundled:** `themes/_example-warm-editorial/` (copy it and drop the leading underscore to activate it)
 
 ---
 
@@ -675,7 +675,7 @@ For offline bundles with `--bundle`: internet connection needed once to inline C
 
 **v1.17.0** — Merge ClawHub v1.16.1 updates + add watermark feature.
 
-**v1.16.0** — Minimal Kami borrowing, fully landed: add hard `anti-patterns.md` and `diagram-decision-rules.md`, introduce silent `spec-loading-matrix.md` plus optional `archetype` routing hints, add maintainer-side `scripts/verify-release.py`, and raise the Windows release suite to 134 passing tests.
+**v1.16.0** — Minimal Kami borrowing, fully implemented: add hard `anti-patterns.md` and `diagram-decision-rules.md`, introduce silent `spec-loading-matrix.md` plus optional `archetype` routing hints, add maintainer-side `scripts/verify-release.py`, and raise the Windows release suite to 134 passing tests.
 
 **v1.15.0** — IR contract hardening and eval foundation: split failures into `invalid_syntax` / `invalid_semantics` / `contract_conflict`, formalize `kpi` / `chart` / `timeline` / `diagram` schemas, demote `badge` to optional enhancement, add repo-contained eval cases plus `run-report-evals.py`, fix install paths to `kai-report-creator`, and bring the Windows release suite to 125 passing tests.
 

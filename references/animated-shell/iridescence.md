@@ -13,7 +13,7 @@ implemented vanilla).
   (`'JetBrains Mono',Menlo,monospace`),
   system sans for body (`system-ui,-apple-system,'Segoe UI',sans-serif`).
 - **Page arc**: `#hero`(100vh WebGL) → cards grid → bar metrics (2-col) →
-  structured conclusions (2×2 cel grid) → comparison table → dark `#sources`
+  structured conclusions (2×2 cell grid) → comparison table → dark `#sources`
   block (`#0a0a12`, every claim gets its source + collection date) → footer.
 - **Section chrome**: each block has mono index kicker (`02 / PLATFORMS`),
   big tight title (clamp, letter-spacing −.03em), right-aligned mono desc.

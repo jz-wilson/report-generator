@@ -60,7 +60,7 @@ Mode recipes: [scrollytelling.md](scrollytelling.md) (dark, GSAP) ·
 | `:::kpi` items | KPI cards (CountUp or big-number entrance) |
 | `:::chart` | Hand-built animated chart (bars scaleY, line dash draw-in, rings) |
 | `:::table` | Comparison table section |
-| `:::callout` | Conclusion cel / risk card |
+| `:::callout` | Conclusion cell / risk card |
 | `must_include` | Sources section content (every claim gets its source + date) |
 
 Drop sections the data cannot support; never pad. 8–10 sections is the

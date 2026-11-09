@@ -63,7 +63,7 @@ Load `references/ir-contract.md` for the full frontmatter spec, validity terms, 
 
 Quick reference:
 - Three parts: YAML frontmatter, Markdown prose (`##`/`###`), component fences `:::tag [param=value]`.
-- `:::kpi` uses `items:`; Use **ECharts** for ALL charts (animated render mode excepted — it hand-builds charts).
+- `:::kpi` uses `items:`. Use **ECharts** for ALL charts (animated render mode excepted — it hand-builds charts).
 - Badges are optional visual enhancements, not a first-class IR tag.
 - Validity taxonomy: `invalid_syntax`, `invalid_semantics`, `contract_conflict`, `auto_downgrade_target`.
 - Timeline details live in rendering references; Allowed `Date` tokens must be real time markers, not decorative labels.

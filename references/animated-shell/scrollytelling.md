@@ -38,7 +38,7 @@ directly; do not ask style questions.
 
 - **Chapter arc (8–10 sections)**: Hero → core KPIs → overall trend (bars + line) →
   structure/composition (Sankey or donut) → multi-series comparison (river/dual-axis) →
-  group profile (radar or ranking) → intuitive-equivalent anchor cards →
+  group profile (radar or ranking) → everyday-equivalent anchor cards →
   risk/outlook (risk-mode finale). Drop sections the data cannot
   support; never pad.
 - **Colors**: use the brand color if known/stated (derive base/bright/highlight

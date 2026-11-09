@@ -10,7 +10,7 @@ Every report must follow this color allocation:
 |-------|------|----------|-------|
 | **90%** | Neutral surface | `--bg`, `--surface`, `--text` | Background, body text, cards |
 | **8%** | Structural color | `--primary` | Section borders, one accent block, h2 underlines |
-| **2%** | Bullet point | `--accent-pop` (default = `--primary` at full opacity) | At most 1-2 precise hits: a single KPI value, one callout border, one chart series |
+| **2%** | Accent highlight | `--accent-pop` (default = `--primary` at full opacity) | At most 1-2 precise hits: a single KPI value, one callout border, one chart series |
 
 **Violations to avoid:**
 - `var(--primary)` used on heading text, KPI values, chart bars, callout borders, TOC links, AND badges simultaneously → this is a primary-color flood
@@ -68,7 +68,7 @@ These patterns make a report look instantly AI-generated. Do not produce them:
 | `:::chart` with all-placeholder data in a text-heavy (narrative/mixed) section | Use `:::diagram` (flowchart/mindmap) or a `highlight-sentence` paragraph |
 | Nested cards (card inside a card) | Flatten hierarchy — use indentation, sub-lists, or adjacent blocks instead |
 | Default text alignment centered everywhere | Left-align body text; center only the title and hero metrics |
-| Glassmorphism (blur/backdrop-filter) as decoration | Solid or subtly tinted backgrounds; blur signals no information |
+| Glassmorphism (blur/backdrop-filter) as decoration | Solid or subtly tinted backgrounds; blur adds no information |
 | `text-align: justify` on body text | Left-align — justified text creates rivers of whitespace |
 | Using monospace fonts to signal "technical/developer" vibes | System sans-serif for all prose; reserve monospace for actual code blocks only |
 | Icon tile (small rounded-square icon container) stacked above section heading | Inline icon in heading or skip entirely — decorative icon squares add no information |

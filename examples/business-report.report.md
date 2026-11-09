@@ -4,7 +4,7 @@ theme: corporate-blue
 author: Sales Operations
 date: 2024-10-08
 lang: en
-abstract: Q3 revenue grew 12% year over year, the South region beat its target by 115%, and new customer count hit a record high.
+abstract: Q3 revenue grew 12% year over year, the South region reached 115% of its target, and new customer count hit a record high.
 ---
 
 ## Key Metrics
@@ -55,7 +55,7 @@ datasets:
 The South region has beaten its target for 3 straight quarters. Consider expanding its sales headcount in Q4.
 :::
 
-- South: beat target by **115%**, best result of the year
+- South: reached **115%** of target, best result of the year
 - North: steady target attainment, 2 new major accounts signed
 - East: slightly below expectations due to market competition
 - Southwest: new-market expansion phase, in line with expectations
