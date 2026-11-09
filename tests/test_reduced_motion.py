@@ -14,13 +14,16 @@ SOURCES = [
 ]
 SETUP = """() => {
   document.body.classList.remove('no-animations');
-  const el = document.querySelector('.fade-in-up');
-  if (!el) return false;
-  el.classList.remove('visible');
+  if (!document.querySelector('.fade-in-up')) return false;
+  // A fresh element that the page's own scroll observer never touches.
+  const el = document.createElement('div');
+  el.id = 'motion-probe';
+  el.className = 'fade-in-up';
   el.style.transition = 'none';
+  document.body.appendChild(el);
   return true;
 }"""
-READ = "() => getComputedStyle(document.querySelector('.fade-in-up')).transform"
+READ = "() => getComputedStyle(document.getElementById('motion-probe')).transform"
 
 
 @pytest.mark.parametrize("path", SOURCES, ids=lambda p: p.name)
@@ -51,3 +54,15 @@ def test_animated_shell_requires_a_reduced_motion_path():
     assert "behavior:'auto'" in overview
     assert "static frame" in overview
     assert "Emulate `prefers-reduced-motion: reduce`" in overview
+
+
+def test_no_overshoot_easing_in_shared_animations():
+    import re
+
+    for path in SOURCES + [ROOT / "templates" / "en" / "regular-lumen.html"]:
+        css = path.read_text(encoding="utf-8")
+        for match in re.finditer(r"cubic-bezier\(([^)]*)\)", css):
+            nums = [float(x) for x in match.group(1).split(",")]
+            assert all(0 <= n <= 1 for n in (nums[1], nums[3])), (
+                f"{path.name}: overshoot easing {match.group(0)} reads as bounce"
+            )

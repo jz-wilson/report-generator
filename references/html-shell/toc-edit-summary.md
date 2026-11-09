@@ -86,7 +86,7 @@
               }, { threshold: 0.1 }).observe(parent);
             });
           }
-          staggerGroup('.kpi-grid', '.kpi-card', 100);   // KPI cards: spring bounce stagger
+          staggerGroup('.kpi-grid', '.kpi-card', 100);   // KPI cards: ease-out stagger
           staggerGroup('.timeline', '.timeline-item', 130); // Timeline items: slide-in stagger
 
           // KPI counter animation (CountUp)

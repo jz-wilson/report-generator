@@ -150,7 +150,7 @@ CSS fragment from the standard shell. Paste inside the shell `<style>` block aft
         .fade-in-up.visible { opacity: 1; transform: translateY(0); }
         .print-exporting .fade-in-up { opacity: 1 !important; transform: none !important; transition: none !important; }
         body.no-animations .fade-in-up { opacity: 1; transform: none; transition: none; }
-        .kpi-grid.stagger-ready .kpi-card { opacity: 0; transform: translateY(20px) scale(0.95); transition: opacity .45s cubic-bezier(0.34,1.56,0.64,1), transform .45s cubic-bezier(0.34,1.56,0.64,1); }
+        .kpi-grid.stagger-ready .kpi-card { opacity: 0; transform: translateY(20px) scale(0.95); transition: opacity .45s cubic-bezier(0.22,1,0.36,1), transform .45s cubic-bezier(0.22,1,0.36,1); }
         .kpi-grid.stagger-ready .kpi-card.visible { opacity: 1; transform: none; }
         .print-exporting .kpi-grid .kpi-card { opacity: 1 !important; transform: none !important; transition: none !important; }
         .timeline.stagger-ready .timeline-item { opacity: 0; transform: translateX(-12px); transition: opacity .4s cubic-bezier(0.22,1,0.36,1), transform .4s cubic-bezier(0.22,1,0.36,1); }
