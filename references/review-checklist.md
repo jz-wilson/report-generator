@@ -2,6 +2,8 @@
 
 Load this file when `--review` is called and as the silent final review pass during `--generate`.
 
+For a deeper pass on one design area (typography, layout, color, simplification, copy, or final polish), see `references/design-refine.md`.
+
 This checklist is designed for **one-pass automatic refinement**. It is not an interactive approval workflow.
 
 ## Overview

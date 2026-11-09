@@ -59,3 +59,17 @@ def test_review_report_template_exists_and_is_documented():
 
     skill = read("SKILL.md")
     assert "review-report-template.md" in skill
+
+
+def test_design_refine_pass_is_routed_and_indexed():
+    skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+    index = (ROOT / "references" / "INDEX.md").read_text(encoding="utf-8")
+    refine = (ROOT / "references" / "design-refine.md").read_text(encoding="utf-8")
+    passes = ["typeset", "layout", "color", "distill", "clarify", "polish", "critique"]
+
+    assert "--focus <pass>" in skill
+    assert "references/design-refine.md" in skill
+    assert "`design-refine.md`" in index
+    for name in passes:
+        assert f"### `{name}`" in refine, f"design-refine.md is missing the {name} pass"
+        assert name in skill, f"SKILL.md should name the {name} pass"

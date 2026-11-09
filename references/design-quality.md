@@ -236,6 +236,7 @@ For content, structure, and reading-flow checks, see [review-checklist.md](revie
 
 **L0 (Visual)**: This file — color, typography, layout, anti-slop presentation rules.
 **L1 (Content)**: `review-checklist.md` — BLUF opening, heading logic, prose walls, takeaways, scan anchors.
+**Design passes**: `design-refine.md` — focused refinement passes (`--review --focus <pass>`) that build on this baseline.
 **L2 (Shell Structure)**: This file §8 — HTML shell element existence, TOC JS contract, edit mode, CSS assembly.
 
 **When to apply:**

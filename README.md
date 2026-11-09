@@ -269,6 +269,7 @@ The current release is **v1.28.1**. Download source bundles from GitHub Releases
 | `/report --plan "topic"` | Create a `.report.md` outline first |
 | `/report --generate file.report.md` | Render an outline to HTML |
 | `/report --review file.html` | Refine an existing report |
+| `/report --review file.html --focus typeset` | Run one design pass: `typeset`, `layout`, `color`, `distill`, `clarify`, `polish`, or `critique` |
 | `/report --themes` | Preview the bundled theme gallery |
 | `/report --bundle --from file.md` | Offline HTML with inlined CDN assets |
 | `/report --theme <name> --from file.md` | Use a built-in or custom theme |
@@ -300,6 +301,12 @@ Run `--review` to improve existing reports with 14 checkpoints:
 
 ```
 /report --review market-analysis.html
+```
+
+**Design passes:** add `--focus <pass>` to run one focused design pass instead of the full checklist. Passes are adapted from [Impeccable](https://impeccable.style/) and use markdown only: `typeset` (hierarchy and reading), `layout` (order and rhythm), `color` (meaning and contrast), `distill` (cut what does not earn its place), `clarify` (copy), `polish` (final pass), and `critique` (scored diagnosis, no edits). See `references/design-refine.md`.
+
+```
+/report --review market-analysis.html --focus layout
 ```
 
 **Behavior:**
