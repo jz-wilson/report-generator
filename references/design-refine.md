@@ -2,7 +2,7 @@
 
 Load this file when `--review` is called with `--focus <pass>`, or when the user asks for a design pass on an existing report: typography, layout, color, simplifying, copy, hardening, adaptation, motion, polish, a design critique, or a technical audit.
 
-Adapted from [Impeccable](https://github.com/pbakaus/impeccable) (Apache 2.0; license and notice in `.claude/skills/impeccable/`). Only the parts that fit a generated, single-file HTML report are kept. Impeccable's detector, live browser mode, hooks, and image-comp pipeline are left out.
+Adapted from [Impeccable](https://github.com/pbakaus/impeccable) (Apache 2.0; license and notice in `licenses/`). Only the parts that fit a generated, single-file HTML report are kept. Impeccable's detector, live browser mode, hooks, and image-comp pipeline are left out.
 
 ## Pick The Pass
 
