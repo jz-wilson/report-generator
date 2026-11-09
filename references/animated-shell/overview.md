@@ -79,6 +79,24 @@ default arc (see mode recipes).
    exits. Hide the scroll hint while playing. Do NOT set `overflow:hidden` on
    `body.playing` — it breaks `scrollIntoView` paging.
 
+## Reduced motion (both modes, always)
+
+Read `window.matchMedia('(prefers-reduced-motion: reduce)')` once at load and
+honor it. The alternative is not "no animation": remove spatial movement and
+keep state changes legible.
+
+- **Content first.** Every section, figure, KPI, and chart is fully visible in
+  its default state and with the preference on. A failed script must not hide
+  the page.
+- **Paging.** Use `scrollIntoView({behavior:'auto'})` instead of `'smooth'`.
+- **GSAP (scrollytelling).** Skip scrubbed, parallax, and travel tweens. Set each
+  element to its end state with `gsap.set`, or play it with a short opacity
+  fade (about 150 ms). Run count-ups and chart draws to their final value at
+  once. Keep the progress bar and active-section state.
+- **WebGL (iridescence).** Render one static frame and do not start the RAF
+  loop. Still pause any loop when the hero is off-screen.
+- **No** autoplay sound, flashing, or looping decoration under the preference.
+
 ## Delivery & QA
 
 Write to the requested path (default report filename rules apply).
@@ -95,6 +113,8 @@ So the browser pass is mandatory, not optional. Walk this checklist once:
 4. iridescence only: the shader animates, pauses when the hero scrolls out of
    view, and the page issues no network requests besides the file itself.
 5. Every figure on the page traces back to the IR or the sources section.
+6. Emulate `prefers-reduced-motion: reduce`: every figure and KPI is visible and
+   at its final value, nothing travels or scrubs, and paging still works.
 
 Then run `python scripts/html_quality_gate.py <file>` and fix findings until it
 passes.

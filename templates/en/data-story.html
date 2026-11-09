@@ -80,6 +80,12 @@
     .fade-in-up { opacity: 0; transform: translateY(18px); transition: opacity .5s ease, transform .5s ease; }
     .fade-in-up.visible { opacity: 1; transform: translateY(0); }
     body.no-animations .fade-in-up { opacity: 1; transform: none; transition: none; }
+    /* Reduced motion: drop spatial movement, keep a short fade so state changes stay visible */
+    @media (prefers-reduced-motion: reduce) {
+      .fade-in-up,
+      .kpi-grid.stagger-ready .kpi-card,
+      .timeline.stagger-ready .timeline-item { transform: none; transition: opacity .15s linear; }
+    }
     .edit-hotzone { position: fixed; bottom: 0; left: 0; width: 80px; height: 80px; z-index: 10000; cursor: pointer; }
     .edit-toggle { position: fixed; bottom: 16px; left: 16px; background: var(--primary); color: #fff; border: none; border-radius: 6px; padding: .45rem .9rem; font-size: .82rem; cursor: pointer; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity .25s ease, background .2s ease; z-index: 10001; box-shadow: 0 2px 8px rgba(0,0,0,.25); }
     .edit-toggle.show { opacity: 1; pointer-events: auto; }

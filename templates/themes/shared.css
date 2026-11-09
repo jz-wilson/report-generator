@@ -160,6 +160,12 @@ body.no-animations .fade-in-up { opacity: 1; transform: none; transition: none; 
 .timeline.stagger-ready .timeline-item.visible { opacity: 1; transform: none; }
 body.no-animations .kpi-grid .kpi-card,
 body.no-animations .timeline .timeline-item { opacity: 1 !important; transform: none !important; transition: none !important; }
+/* Reduced motion: drop spatial movement, keep a short fade so state changes stay visible */
+@media (prefers-reduced-motion: reduce) {
+  .fade-in-up,
+  .kpi-grid.stagger-ready .kpi-card,
+  .timeline.stagger-ready .timeline-item { transform: none; transition: opacity .15s linear; }
+}
 
 /* Edit mode */
 .edit-hotzone { position: fixed; bottom: 0; left: 0; width: 80px; height: 80px; z-index: 10000; cursor: pointer; }

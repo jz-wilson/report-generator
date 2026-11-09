@@ -125,6 +125,12 @@
     /* Animations */
     .fade-in-up { opacity: 0; transform: translateY(18px); transition: opacity .5s ease, transform .5s ease; }
     .fade-in-up.visible { opacity: 1; transform: translateY(0); }
+    /* Reduced motion: drop spatial movement, keep a short fade so state changes stay visible */
+    @media (prefers-reduced-motion: reduce) {
+      .fade-in-up,
+      .kpi-grid.stagger-ready .kpi-card,
+      .timeline.stagger-ready .timeline-item { transform: none; transition: opacity .15s linear; }
+    }
 
     /* ── TOC ── */
     .toc-sidebar {

@@ -158,3 +158,9 @@ CSS fragment from the standard shell. Paste inside the shell `<style>` block aft
         .print-exporting .timeline .timeline-item { opacity: 1 !important; transform: none !important; transition: none !important; }
         body.no-animations .kpi-grid .kpi-card,
         body.no-animations .timeline .timeline-item { opacity: 1 !important; transform: none !important; transition: none !important; }
+        /* Reduced motion: drop spatial movement, keep a short fade so state changes stay visible */
+        @media (prefers-reduced-motion: reduce) {
+          .fade-in-up,
+          .kpi-grid.stagger-ready .kpi-card,
+          .timeline.stagger-ready .timeline-item { transform: none; transition: opacity .15s linear; }
+        }
